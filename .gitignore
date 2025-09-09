@@ -1,0 +1,58 @@
+# Node / paquetes
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+# Builds de la app
+dist/
+dist-electron/
+release/
+out/
+build/
+
+# Cache de bundlers / tooling
+.vite/
+.esbuild/
+.cache/
+*.tsbuildinfo
+
+# SO / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Entornos / secretos
+.env
+.env.*
+!.env.example
+
+# Binarios externos y artefactos grandes
+vendor/ventoy/**         # no versionar binarios de Ventoy
+!vendor/ventoy/.keep     # dejá un marcador vacío si querés mantener la carpeta
+*.iso                    # nunca subas ISOs al repo
+*.dmg
+*.exe
+*.msi
+*.pkg
+*.AppImage
+*.zip
+
+# Cobertura/pruebas
+coverage/
+.nyc_output/
