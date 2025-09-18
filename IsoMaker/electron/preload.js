@@ -19,17 +19,15 @@ contextBridge.exposeInMainWorld('api', {
     return () => ipcRenderer.removeListener('ventoy:done', h);
   },
 
-  // Ventoy legacy
+  // Ventoy legacy + helpers
   ventoyRun: (payload) => ipcRenderer.invoke('ventoy:run', payload),
   ventoyCopyIso: (payload) => ipcRenderer.invoke('ventoy:copyIso', payload),
   ventoyDefaultPath: () => ipcRenderer.invoke('ventoy:defaultPath'),
   ventoyPickExe: () => ipcRenderer.invoke('ventoy:pickExe'),
 
-  // Repo + hash
+  // Repo + hash + descarga con progreso
   repoIndex: (baseUrl) => ipcRenderer.invoke('repo:index', baseUrl),
   hashVerify: (payload) => ipcRenderer.invoke('hash:verify', payload),
-
-  // NUEVO: descarga con progreso
   repoDownloadStart: (payload) => ipcRenderer.invoke('repo:downloadStart', payload),
   onRepoProgress: (cb) => {
     const h = (_e, data) => cb(data);
@@ -41,4 +39,8 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.on('repo:done', h);
     return () => ipcRenderer.removeListener('repo:done', h);
   },
+
+  // PQTools
+  pqtoolsDefaultSrc: () => ipcRenderer.invoke('pqtools:defaultSrc'),
+  pqtoolsInstall: (payload) => ipcRenderer.invoke('pqtools:install', payload),
 });

@@ -11,5 +11,5 @@
     "strict": false,
     "noEmitOnError": false
   },
-  "include": ["electron/**/*.ts", "services/**/*.ts", "shared/**/*.ts", "src/**/*.tsx"]
+  "include": ["electron/**/*.ts", "services/**/*.ts", "shared/**/*.ts", "src/**/*.tsx", "services/drives.js"]
 }

@@ -1,137 +1,101 @@
-// services/ventoy.js — UAC + progreso por archivos CLI (cli_percent/done/log)
+// services/ventoy.js — ejecución con UAC y polling robusto de estado (ESM puro)
 import { spawn } from 'node:child_process';
 import { promises as fsp } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 
-function psQuote(str) { return `'${String(str).replace(/'/g, "''")}'`; }
-
-function execPowerShell(script) {
-  return new Promise((resolve, reject) => {
-    const child = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script], { windowsHide: true });
-    let err = '';
-    child.stderr.on('data', (d) => (err += d.toString()));
-    child.on('error', reject);
-    child.on('close', (code) => { code === 0 ? resolve() : reject(new Error(err || `PowerShell exited with code ${code}`)); });
-  });
+async function mkWorkdir() {
+  const p = path.join(os.tmpdir(), `ventoy-${Date.now()}`);
+  await fsp.mkdir(p, { recursive: true });
+  return p;
 }
 
-async function makeWorkdir() {
-  if (process.platform === 'win32') {
-    const pub = process.env.PUBLIC || path.join(os.homedir(), 'Public');
-    const base = path.join(pub, 'VentoyCLI');
-    await fsp.mkdir(base, { recursive: true });
-    return await fsp.mkdtemp(path.join(base, 'run-'));
+function makeArgs(payload) {
+  const drive = payload.target.endsWith(':') ? payload.target : `${payload.target}:`;
+  const gpt = payload.flags && payload.flags.gpt !== false;
+  const mode = payload.mode === 'update' ? '/Update' : '/Install';
+  const table = gpt ? '-g' : '-m';
+  const tgt = drive.toUpperCase();
+  return [mode, table, tgt];
+}
+
+async function readFileNum(p) {
+  try {
+    const s = await fsp.readFile(p, 'utf8');
+    const n = parseInt(String(s).trim(), 10);
+    return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : null;
+  } catch {
+    return null;
   }
-  return await fsp.mkdtemp(path.join(os.tmpdir(), 'ventoy-cli-'));
 }
 
-// === API 1: startVentoy (no bloquea) + readVentoyStatus (snapshot)
-export async function startVentoy(opts) {
-  const { exePath, mode, targetType, target, flags = {} } = opts || {};
-  if (!exePath || !mode || !targetType || (target == null)) throw new Error('Missing Ventoy parameters');
+export async function startVentoy(payload) {
+  const workdir = await mkWorkdir();
+  const args = makeArgs(payload); // ej: ['/Install','-g','E:']
 
-  const workdir = await makeWorkdir();
+  // Armamos ArgumentList como array PowerShell: @('/Install','-g','E:')
+  const esc = (s) => String(s).replace(/'/g, "''"); // escape de comillas simples para PS
+  const psArgList = `@('${args.map(esc).join("','")}')`;
 
-  const cmd = 'VTOYCLI';
-  const action = mode === 'install' ? '/I' : '/U';
-  const diskArg = targetType === 'PhyDrive' ? `/PhyDrive:${target}` : `/Drive:${String(target).toUpperCase()}`;
-  const extra = [];
-  if (flags.gpt) extra.push('/GPT');
-  if (flags.nosb) extra.push('/NOSB');
-  if (flags.nousbcheck) extra.push('/NOUSBCheck');
-  if (flags.reserveMB) extra.push(`/R:${flags.reserveMB}`);
-  if (flags.fs) extra.push(`/FS:${flags.fs}`);
-  if (flags.nondest) extra.push('/NonDest');
+  const psCmd = [
+    "$ErrorActionPreference='Stop';",
+    "Start-Process",
+    "-FilePath", `'${esc(payload.exePath)}'`,
+    "-ArgumentList", psArgList,
+    "-WorkingDirectory", `'${esc(workdir)}'`,
+    "-Verb", "RunAs"
+  ].join(' ');
 
-  const argumentList = `${cmd} ${action} ${diskArg} ${extra.join(' ')}`.trim();
+  await new Promise((resolve, reject) => {
+    const p = spawn(
+      process.env.ComSpec || 'cmd.exe',
+      ['/d', '/s', '/c', `powershell -NoProfile -ExecutionPolicy Bypass -Command "${psCmd}"`],
+      { windowsHide: true }
+    );
+    p.on('error', reject);
+    p.on('exit', (code) => (code === 0 ? resolve(undefined) : reject(new Error(`Start-Process exit ${code}`))));
+  });
 
-  // Lanzamos como admin SIN -Wait para poder poller los archivos de progreso
-  const ps = `
-$ErrorActionPreference = 'Stop'
-Start-Process -FilePath ${psQuote(exePath)} -ArgumentList ${psQuote(argumentList)} -WorkingDirectory ${psQuote(workdir)} -Verb RunAs
-`;
-  await execPowerShell(ps);
   return { workdir };
 }
 
+
 export async function readVentoyStatus(workdir) {
-  const donePath = path.join(workdir, 'cli_done.txt');
-  const percPath = path.join(workdir, 'cli_percent.txt');
-  const logPath  = path.join(workdir, 'cli_log.txt');
+  const fPercent = path.join(workdir, 'cli_percent.txt');
+  const fDone    = path.join(workdir, 'cli_done.txt');
+  const fLog     = path.join(workdir, 'Ventoy2Disk.log');
 
-  let percent = null;
-  try {
-    const raw = await fsp.readFile(percPath, 'utf8');
-    const v = parseInt(raw.trim(), 10);
-    if (!Number.isNaN(v)) percent = Math.max(0, Math.min(100, v));
-  } catch {}
+  const percent = await readFileNum(fPercent);
+  let state = 'waiting_uac'; // 'waiting_uac' | 'running' | 'success' | 'failure'
+  if (percent !== null && percent > 0) state = 'running';
 
-  let state = 'running';
-  let exitCode = null;
-  try {
-    const raw = await fsp.readFile(donePath, 'utf8');
-    exitCode = parseInt(raw.trim(), 10);
-    state = exitCode === 0 ? 'success' : 'failure';
-  } catch {}
+  let doneTxt = '';
+  try { doneTxt = (await fsp.readFile(fDone, 'utf8')).toLowerCase(); } catch {}
+
+  if (doneTxt.includes('success') || doneTxt.includes('ok') || doneTxt.includes('exit code: 0')) {
+    state = 'success';
+  } else if (doneTxt.includes('fail') || doneTxt.includes('error') || doneTxt.includes('exit code')) {
+    state = 'failure';
+  }
 
   let logTail = '';
   try {
-    const log = await fsp.readFile(logPath, 'utf8');
-    logTail = log.length > 4000 ? log.slice(-4000) : log;
+    const buf = await fsp.readFile(fLog, 'utf8');
+    logTail = buf.split(/\r?\n/).slice(-20).join('\n');
   } catch {}
 
-  return { state, percent, exitCode, logTail };
+  return { state, percent: percent ?? 0, logTail };
 }
 
-// === API 2 (bloqueante, por compat)
-export async function runVentoy(opts) {
-  const { exePath, mode, targetType, target, flags = {} } = opts || {};
-  if (!exePath || !mode || !targetType || (target == null)) throw new Error('Missing Ventoy parameters');
-
-  const workdir = await makeWorkdir();
-  const cmd = 'VTOYCLI';
-  const action = mode === 'install' ? '/I' : '/U';
-  const diskArg = targetType === 'PhyDrive' ? `/PhyDrive:${target}` : `/Drive:${String(target).toUpperCase()}`;
-  const extra = [];
-  if (flags.gpt) extra.push('/GPT');
-  if (flags.nosb) extra.push('/NOSB');
-  if (flags.nousbcheck) extra.push('/NOUSBCheck');
-  if (flags.reserveMB) extra.push(`/R:${flags.reserveMB}`);
-  if (flags.fs) extra.push(`/FS:${flags.fs}`);
-  if (flags.nondest) extra.push('/NonDest');
-  const argumentList = `${cmd} ${action} ${diskArg} ${extra.join(' ')}`.trim();
-
-  const ps = `
-$ErrorActionPreference = 'Stop'
-Start-Process -FilePath ${psQuote(exePath)} -ArgumentList ${psQuote(argumentList)} -WorkingDirectory ${psQuote(workdir)} -Verb RunAs -Wait
-`;
-  await execPowerShell(ps);
-
-  const donePath = path.join(workdir, 'cli_done.txt');
-  const percPath = path.join(workdir, 'cli_percent.txt');
-  const logPath  = path.join(workdir, 'cli_log.txt');
-
-  let status = 'unknown';
-  try {
-    const done = (await fsp.readFile(donePath, 'utf8')).trim();
-    status = done === '0' ? 'success' : 'failure';
-  } catch {}
-  let percent = null;
-  try { percent = parseInt((await fsp.readFile(percPath, 'utf8')).trim(), 10); } catch {}
-  let log = '';
-  try { log = await fsp.readFile(logPath, 'utf8'); } catch {}
-  return { workdir, status, percent, log };
+export async function runVentoy(payload) {
+  const { workdir } = await startVentoy(payload);
+  const t0 = Date.now();
+  while (Date.now() - t0 < 10 * 60_000) { // 10 min
+    const s = await readVentoyStatus(workdir);
+    if (s.state === 'success' || s.state === 'failure') return { status: s.state, percent: s.percent };
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  return { status: 'failure', percent: 0 };
 }
 
-export async function copyIsoToDrive({ isoPath, driveLetter, destName }) {
-  const src = path.resolve(isoPath);
-  const root = String(driveLetter).endsWith('\\') ? String(driveLetter) : String(driveLetter) + '\\';
-  const dst = path.join(root, destName || path.basename(src));
-  await fsp.mkdir(path.dirname(dst), { recursive: true });
-  const ps = `Copy-Item -LiteralPath ${psQuote(src)} -Destination ${psQuote(dst)} -Force`;
-  await execPowerShell(ps);
-  return { dst };
-}
-
-export default { startVentoy, readVentoyStatus, runVentoy, copyIsoToDrive };
+export default { startVentoy, readVentoyStatus, runVentoy };
