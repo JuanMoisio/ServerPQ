@@ -112,18 +112,31 @@ export default function App() {
     if (p) setExePath(p);
   }
 
-  async function startVentoy(mode: 'install' | 'update') {
-    setLog('');
-    setVPercent(0);
-    setVState('waiting_uac'); // arranca en esperando UAC hasta que el backend detecte progreso real
-    try {
-      const res = await window.api.ventoyStart({ exePath, mode, targetType: 'Drive', target: selected, flags: { gpt: (mode === 'install') } });
-      if (res?.workdir) setLog(l => (l ? l + '\n' : '') + `Ventoy workdir: ${res.workdir}`);
-    } catch (e: any) {
-      setVState('failure');
-      setLog(String(e?.message || e));
-    }
+ async function startVentoy(mode: 'install' | 'update') {
+  setLog('');
+  setVPercent(0);
+  setVState('waiting_uac');
+
+  // 👇 añadimos physIndex del pendrive seleccionado
+  const selDrive = drives.find(d => d.letter === selected);
+  const physIndex = selDrive?.physIndex;
+
+  try {
+    const res = await window.api.ventoyStart({
+      exePath,
+      mode,
+      targetType: 'Drive',
+      target: selected,
+      flags: { gpt: (mode === 'install') },
+      physIndex, // <--- NUEVO
+    });
+    if (res?.workdir) setLog(l => (l ? l + '\n' : '') + `Ventoy workdir: ${res.workdir}`);
+  } catch (e: any) {
+    setVState('failure');
+    setLog(String(e?.message || e));
   }
+}
+
 
   async function installLegacy() {
     setLog('');

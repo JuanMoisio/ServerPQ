@@ -116,27 +116,80 @@ function stopProgressTimer(id: number) {
   if (t) { clearInterval(t); progressTimers.delete(id); }
 }
 
-ipcMain.handle('ventoy:start', async (evt, payload) => {
+ipcMain.handle('ventoy:start', async (evt, payload: { target: string; physIndex?: number }) => {
   const wc = evt.sender; const webId = wc.id;
-  log('ipc ventoy:start', payload);
   stopProgressTimer(webId);
+
   const ventoy = await loadVentoy();
+  const drives = await loadDrives();
+
+  const startLetter = (payload.target || '').toUpperCase().replace(/:?$/, ':');   // ej. "E:"
+  const targetPhys  = (typeof payload.physIndex === 'number') ? payload.physIndex : undefined;
+
   const { workdir } = await ventoy.startVentoy(payload);
 
   const tStart = Date.now();
   let staleCount = 0;
+  let sawGone = false;      // desapareció (reparticionando)
+  let lastLetter = startLetter;
 
   const timer = setInterval(async () => {
     try {
+      // 1) Status por archivos (si existieran)
       const s = await ventoy.readVentoyStatus(workdir);
+
+      // 2) Status por DISCO (robusto): buscar por physIndex y/o por letra inicial
+      let current = null as null | { letter: string; volumeLabel?: string };
+      try {
+        const list = await drives.listRemovableDrives();
+        if (targetPhys !== undefined) {
+          current = list.find((d: any) => d.physIndex === targetPhys) || null;
+        }
+        if (!current) {
+          // fallback por letra inicial
+          current = list.find((d: any) => (d.letter || '').toUpperCase() === lastLetter) || null;
+        }
+      } catch {}
+
+      // Detectar desaparición / reaparición
+      if (!current) {
+        // Si antes estaba y ahora no, lo tomamos como "running"
+        sawGone = true;
+        wc.send('ventoy:progress', { percent: Math.max(1, s.percent ?? 0), state: 'running' });
+      } else {
+        // trackear si cambió de letra
+        const curLetter = (current.letter || '').toUpperCase().replace(/:?$/, ':');
+        lastLetter = curLetter || lastLetter;
+
+        const label = String(current.volumeLabel || '').toUpperCase();
+        const labelIsVentoy = label === 'VENTOY';
+
+        if (labelIsVentoy) {
+          // ✅ Éxito por etiqueta (aunque Ventoy no genere cli_done.txt)
+          stopProgressTimer(webId);
+          wc.send('ventoy:progress', { percent: 100, state: 'success' });
+          wc.send('ventoy:done', { state: 'success', percent: 100, detectedLabel: true, newLetter: lastLetter, workdir });
+          return;
+        }
+
+        // Si reaparece pero aún sin etiqueta VENTOY, seguimos "running"
+        if (sawGone) {
+          wc.send('ventoy:progress', { percent: Math.max(5, s.percent ?? 0), state: 'running' });
+        }
+      }
+
+      // Mantener compatibilidad con status por workdir
       if ((s.percent ?? 0) === 0 && s.state !== 'success' && s.state !== 'failure') {
         staleCount++;
-        if (staleCount === 10) wc.send('ventoy:progress', { percent: 0, state: 'waiting_uac' });
+        if (staleCount === 5) {
+          wc.send('ventoy:progress', { percent: 0, state: 'waiting_uac' });
+        }
       } else {
         staleCount = 0;
+        wc.send('ventoy:progress', s);
       }
-      wc.send('ventoy:progress', s);
-      const tooLong = Date.now() - tStart > 10 * 60_000; // 10 min
+
+      const tooLong = Date.now() - tStart > 10 * 60_000;
       if (s.state === 'success' || s.state === 'failure' || tooLong) {
         stopProgressTimer(webId);
         wc.send('ventoy:done', { ...s, workdir, timeout: tooLong });
@@ -145,11 +198,12 @@ ipcMain.handle('ventoy:start', async (evt, payload) => {
       stopProgressTimer(webId);
       wc.send('ventoy:done', { state: 'failure', percent: 0, error: String(e) });
     }
-  }, 800);
+  }, 1000);
 
   progressTimers.set(webId, timer);
   return { workdir };
 });
+
 
 ipcMain.handle('ventoy:cancelProgress', async (evt) => { stopProgressTimer(evt.sender.id); return true; });
 
