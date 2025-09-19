@@ -59,8 +59,7 @@ exit /b %EC%
 `;
 }
 
-// === Capturador con VSS (usa $comp para evitar colisión con $Host) ===
-// === Capturador con VSS (con chequeo de espacio previo) ===
+// === Capturador con VSS (chequeo PREVIO: 60% + tolerancia opcional) ===
 function pqCapturePs1() {
   return `#requires -version 2
 $ErrorActionPreference = 'Stop'
@@ -78,10 +77,6 @@ $scriptRoot = Split-Path -Path $scriptPath -Parent
 $usbRoot    = [System.IO.Path]::GetPathRoot($scriptRoot)
 $usbLetter  = $usbRoot.TrimEnd('\\')
 
-Info "ScriptPath: $scriptPath"
-Info "ScriptRoot: $scriptRoot"
-Info "USB Root:   $usbRoot"
-
 # --- Admin? ---
 $principal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -97,39 +92,66 @@ if (-not (Test-Path $wimlib)) {
   Read-Host "Enter para salir"; exit 1
 }
 
-# --- Estimar tamaño necesario y chequear espacio ANTES de capturar ---
-#   Estimación: ~75% de lo usado en C: (LZX suele ~50–65%; usamos 75% por margen)
+# --- Estimar tamaño necesario (60% de lo usado en C:) y chequear espacio ANTES de capturar ---
 $srcDrive = 'C:'
+$factor   = 0.60          # ← estimación conservadora
+$softGapMB = 512          # ← tolerancia “blanda”: permití seguir si faltan <= 512 MB
+$minSoftMB = 50           # ← y nunca menos de 50 MB de margen
+
 try {
-  $sys = Get-WmiObject Win32_LogicalDisk -Filter "DeviceID='$($srcDrive)'"
+  $sys = Get-WmiObject Win32_LogicalDisk -Filter "DeviceID='$($srcDrive)'" -ErrorAction Stop
 } catch { $sys = $null }
 if ($null -eq $sys) {
-  try { $sys = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='$($srcDrive)'" } catch { $sys = $null }
+  try { $sys = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='$($srcDrive)'" -ErrorAction Stop } catch { $sys = $null }
 }
 if ($null -eq $sys) {
   Warn "No pude leer métricas de $srcDrive. Continuaré sin chequeo de espacio."
 } else {
   $usedBytes = [int64]$sys.Size - [int64]$sys.FreeSpace
-  $needBytes = [int64]([math]::Ceiling($usedBytes * 0.75))   # 75% del usado
+  $needBytes = [int64]([math]::Ceiling($usedBytes * $factor))   # 60% del usado
+
   # espacio libre en el USB
   try {
-    $usbInfo = Get-WmiObject Win32_LogicalDisk -Filter "DeviceID='$($usbLetter)'"
+    $usbInfo = Get-WmiObject Win32_LogicalDisk -Filter "DeviceID='$($usbLetter)'" -ErrorAction Stop
   } catch { $usbInfo = $null }
   if ($null -eq $usbInfo) {
-    try { $usbInfo = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='$($usbLetter)'" } catch { $usbInfo = $null }
+    try { $usbInfo = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='$($usbLetter)'" -ErrorAction Stop } catch { $usbInfo = $null }
   }
+
   if ($usbInfo) {
     $freeBytes = [int64]$usbInfo.FreeSpace
-    Info ("Espacio usado en {0}: {1:N0} MB  → estimado WIM: {2:N0} MB" -f $srcDrive, ($usedBytes/1MB), ($needBytes/1MB))
-    Info ("Espacio libre en {0}: {1:N0} MB" -f $usbLetter, ($freeBytes/1MB))
+
+    $usedMB = [math]::Round($usedBytes/1MB, 0)
+    $needMB = [math]::Round($needBytes/1MB, 0)
+    $freeMB = [math]::Round($freeBytes/1MB, 0)
+
+    Info ("Uso en {0}: {1:N0} MB" -f $srcDrive, $usedMB)
+    Info ("Estimado WIM (60%): {0:N0} MB" -f $needMB)
+    Info ("Libre en {0}: {1:N0} MB" -f $usbLetter, $freeMB)
+
     if ($freeBytes -lt $needBytes) {
-      Err ("No hay espacio suficiente en {0}. Necesario ~{1:N0} MB, disponible {2:N0} MB." -f $usbLetter, ($needBytes/1MB), ($freeBytes/1MB))
-      Write-Host ""
-      Write-Host "Sugerencias:" -ForegroundColor Yellow
-      Write-Host " - Usá un USB más grande o un disco externo." -ForegroundColor Yellow
-      Write-Host " - Capturá a una ruta de red: mapeá con 'net use Z: \\\\SERVIDOR\\share' y cambiá el destino." -ForegroundColor Yellow
-      Read-Host "Enter para salir"
-      exit 2
+      $gapBytes = $needBytes - $freeBytes
+      $gapMB    = [math]::Round($gapBytes/1MB, 0)
+      $softMB   = [math]::Max($softGapMB, $minSoftMB)  # umbral en MB
+
+      if ($gapMB -le $softMB) {
+        Warn ("Puede faltar ~{0:N0} MB según el estimado. Podría alcanzar igual." -f $gapMB)
+        $ans = Read-Host "¿Querés continuar de todos modos? [S/N]"
+        if ($ans -notmatch '^(s|S|y|Y)$') {
+          Err "Cancelado por usuario (espacio justo)."
+          exit 3
+        } else {
+          Info "Continuando por pedido del usuario..."
+        }
+      } else {
+        Err ("No hay espacio suficiente en {0}. Necesario ~{1:N0} MB, disponible {2:N0} MB." -f $usbLetter, $needMB, $freeMB)
+        Write-Host ""
+        Write-Host "Sugerencias:" -ForegroundColor Yellow
+        Write-Host " - Usá un USB/disco más grande." -ForegroundColor Yellow
+        Write-Host " - Capturá a una ruta de red: mapeá con 'net use Z: \\\\SERVIDOR\\share' y guardá allí." -ForegroundColor Yellow
+        Read-Host "Enter para salir"
+        exit 2
+      }
     }
   } else {
     Warn "No pude leer el espacio libre del USB. Continuaré sin chequeo."
@@ -209,6 +231,7 @@ Write-Host "SHA256:  $($sha.Hash)"
 Read-Host "Enter para salir"
 `;
 }
+
 
 
 export async function installPQTools({ driveLetter, srcDir }) {

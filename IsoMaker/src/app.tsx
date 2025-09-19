@@ -322,6 +322,32 @@ export default function App() {
         <h3>Logs</h3>
         <textarea readOnly value={log} style={{ width: '100%', height: 200, fontFamily: 'ui-monospace' }} />
       </section>
+
+      <section style={{ border: '1px solid #444', borderRadius: 8, padding: 12, marginTop: 16 }}>
+  <h3>4) Pack WinPE de restauración</h3>
+  <p style={{ fontSize: 12, opacity: .85 }}>
+    Copia <code>PQS_WinPE.iso</code> a <code>\ISOs\</code> y deja los scripts en <code>\PQTools\WinPE\scripts\</code>.
+  </p>
+  <div>
+    <button
+      onClick={async () => {
+        try {
+          const res = await window.api.winpeInstall({ driveLetter: selected });
+          alert(`WinPE instalado.\nISO: ${res.isoPath}\nScripts: ${res.scriptsDir}`);
+        } catch (e:any) {
+          alert('Error instalando WinPE: ' + (e?.message || String(e)));
+        }
+      }}
+      disabled={!selected}
+    >
+      Instalar pack WinPE en {selected || 'USB'}
+    </button>
+  </div>
+  <p style={{ fontSize: 12, opacity: .7, marginTop: 8 }}>
+    Luego booteá <b>PQS_WinPE.iso</b> desde Ventoy y ejecutá <code>PQTools\WinPE\scripts\restore.cmd</code>.
+  </p>
+</section>
+
     </div>
   );
 }

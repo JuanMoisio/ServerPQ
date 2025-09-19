@@ -43,4 +43,5 @@ contextBridge.exposeInMainWorld('api', {
   // PQTools
   pqtoolsDefaultSrc: () => ipcRenderer.invoke('pqtools:defaultSrc'),
   pqtoolsInstall: (payload) => ipcRenderer.invoke('pqtools:install', payload),
+  winpeInstall: (payload) => ipcRenderer.invoke('winpe:installPack', payload),
 });

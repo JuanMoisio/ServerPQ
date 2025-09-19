@@ -100,6 +100,12 @@ app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) creat
 process.on('uncaughtException', (e) => err('uncaughtException:', e));
 process.on('unhandledRejection', (r) => err('unhandledRejection:', r));
 
+async function loadWinPE() {
+  const m = await import(hrefFrom('services/winpe.js'));
+  return (m && m.default) ? { ...m.default, ...m } : m;
+}
+
+
 // ================= IPC =================
 
 // DRIVES: import perezoso (no toca ventoy ni otros módulos)
@@ -303,4 +309,8 @@ ipcMain.handle('pqtools:install', async (_evt, payload) => {
   log('ipc pqtools:install', payload?.driveLetter);
   const pqtools = await loadPQTools();
   return pqtools.installPQTools(payload);
+});
+ipcMain.handle('winpe:installPack', async (_evt, payload) => {
+  const winpe = await loadWinPE();
+  return winpe.installWinPEPack(payload || {});
 });
