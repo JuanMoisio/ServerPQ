@@ -1,93 +1,77 @@
-// services/winpe.js — copia el pack de WinPE (ISO + scripts) al USB
-import { promises as fsp } from 'node:fs';
+// services/winpe.js — copia ISO de WinPE + scripts de restauración al USB
+import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { app } from 'electron'; // solo disponible cuando se importa desde main (ESM)
 
-function isRootDir(p) { return /^[A-Za-z]:\\$/.test(path.win32.normalize(p)); }
-async function ensureDirSafe(p) { const n = path.win32.normalize(p); if (isRootDir(n)) return; await fsp.mkdir(n, { recursive: true }); }
-async function copyRecursive(src, dst) {
-  const st = await fsp.stat(src);
-  if (st.isDirectory()) {
-    await ensureDirSafe(dst);
-    for (const it of await fsp.readdir(src)) {
-      await copyRecursive(path.win32.join(src, it), path.win32.join(dst, it));
-    }
-  } else {
-    await ensureDirSafe(path.win32.dirname(dst));
-    await fsp.copyFile(src, dst);
-  }
+async function ensureDir(p) {
+  await fs.mkdir(p, { recursive: true });
+}
+async function exists(p) {
+  try { await fs.access(p); return true; } catch { return false; }
+}
+async function copyFile(src, dst) {
+  await ensureDir(path.dirname(dst));
+  await fs.copyFile(src, dst);
+}
+function usbRootFromLetter(letter) {
+  const L = letter.endsWith(':') ? letter : `${letter}:`;
+  return `${L}\\`; // "E:\" por ejemplo
 }
 
-// === scripts embebidos mínimos ===
-function script_restore_cmd() {
-  return `@echo off
-setlocal
+// --- Scripts embebidos ---
+const RESTORE_CMD = `@echo off
+setlocal ENABLEDELAYEDEXPANSION
 title PQS Restore
+
+set "SCRIPTDIR=%~dp0"
+if "%SCRIPTDIR:~-1%"=="\\" set "SCRIPTDIR=%SCRIPTDIR:~0,-1%"
+
+echo Scripts en: "%SCRIPTDIR%"
+echo.
 echo =========================================
 echo   PQS Restore Menu
 echo =========================================
-echo [1] Restaurar UEFI/GPT (recomendado)
-echo [2] Restaurar BIOS/MBR
+echo [1] UEFI/GPT (recomendado)
+echo [2] BIOS/MBR
 echo [X] Salir
 set /p CH=Seleccione opcion: 
-if "%CH%"=="1" goto UEFI
-if "%CH%"=="2" goto BIOS
-goto END
+
+if /I "%CH%"=="1" goto UEFI
+if /I "%CH%"=="2" goto BIOS
+exit /b 0
+
 :UEFI
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0restore-uefi.ps1"
-goto END
+if exist X:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe if exist "%SCRIPTDIR%\\restore-uefi.ps1" (
+  X:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%SCRIPTDIR%\\restore-uefi.ps1"
+) else (
+  call "%SCRIPTDIR%\\restore-uefi.cmd"
+)
+exit /b %errorlevel%
+
 :BIOS
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0restore-bios.ps1"
-:END
-pause
+if exist X:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe if exist "%SCRIPTDIR%\\restore-bios.ps1" (
+  X:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%SCRIPTDIR%\\restore-bios.ps1"
+) else (
+  call "%SCRIPTDIR%\\restore-bios.cmd"
+)
+exit /b %errorlevel%
 `;
-}
 
-function script_common_ps1() {
-  return `# common.ps1 — utilidades compartidas
-$ErrorActionPreference = 'Stop'
-function Log($m){ $ts=(Get-Date -Format 'yyyy-MM-dd HH:mm:ss'); Write-Host "[${ts}] $m" }
-function FindUsbRoot() {
-  # Buscamos la unidad que contiene \\PQTools\\WinPE\\scripts\\common.ps1
-  foreach ($d in Get-PSDrive -PSProvider FileSystem) {
-    $p = Join-Path $d.Root 'PQTools\\WinPE\\scripts\\common.ps1'
-    if (Test-Path $p) { return $d.Root }
-  }
-  return $null
-}
-function FindLatestWim($usbRoot) {
-  $caps = Join-Path $usbRoot 'Capturas'
-  if (-not (Test-Path $caps)) { return $null }
-  $list = Get-ChildItem -Path $caps -Recurse -Filter 'install.wim' -ErrorAction SilentlyContinue
-  if (!$list) { return $null }
-  $sel = $list | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-  return $sel.FullName
-}
-function EnsureTool($name) {
-  $p1 = Join-Path $PSScriptRoot $name
-  $p2 = $name
-  if (Test-Path $p1) { return $p1 }
-  if (Get-Command $p2 -ErrorAction SilentlyContinue) { return $p2 }
-  throw "No se encontró herramienta: $name"
-}
-`;
-}
+const RESTORE_UEFI_PS1 = `$ErrorActionPreference = 'Stop'
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$usbRoot = Split-Path -Qualifier $ScriptDir
 
-function script_restore_uefi_ps1() {
-  return `# restore-uefi.ps1
-$ErrorActionPreference = 'Stop'
-. "$PSScriptRoot\\common.ps1"
+$wim = Get-ChildItem -Path (Join-Path $usbRoot 'Capturas') -Recurse -Filter install.wim -EA SilentlyContinue |
+       Sort-Object LastWriteTime -Descending | Select-Object -First 1
+if (-not $wim) {
+  $wim = Get-ChildItem -Path (Join-Path $usbRoot 'Capturas') -Recurse -Filter install.swm -EA SilentlyContinue |
+         Sort-Object LastWriteTime -Descending | Select-Object -First 1
+  if (-not $wim) { throw "No se encontró install.wim / .swm en $usbRoot\\Capturas" }
+}
+Write-Host "Usando imagen:" $wim.FullName
 
-$usbRoot = FindUsbRoot
-if (-not $usbRoot) { Write-Host "No encuentro el USB con PQTools."; pause; exit 2 }
-$wim = FindLatestWim $usbRoot
-if (-not $wim) { Write-Host "No encuentro install.wim en $usbRoot\\Capturas"; pause; exit 3 }
+$ans = Read-Host "ESTO BORRA EL DISCO 0. Continuar? (S/N)"
+if ($ans -notin @('S','s','Y','y')) { exit 10 }
 
-Write-Host "WIM: $wim"
-$ans = Read-Host "Esto BORRARÁ el Disco 0 y restaurará UEFI/GPT. Continuar? [S/N]"
-if ($ans -notmatch '^(s|S|y|Y)$') { Write-Host "Cancelado"; exit 10 }
-
-# Disk 0 UEFI layout
 $dp = @"
 select disk 0
 clean
@@ -99,43 +83,42 @@ create partition msr size=16
 create partition primary
 format quick fs=ntfs label=Windows
 assign letter=C
-list volume
 exit
 "@
-$dpPath = Join-Path $env:TEMP 'uefi.diskpart.txt'
-$dp | Out-File -Encoding ASCII -FilePath $dpPath
-diskpart /s "$dpPath"
+$dp | Out-File "$env:TEMP\\uefi.diskpart.txt" -Encoding ASCII
+diskpart /s "$env:TEMP\\uefi.diskpart.txt"
 
-# Aplicar imagen
-$wimlib = EnsureTool 'wimlib-imagex.exe'
-& "$wimlib" apply "$wim" 1 C:\\ --check
-if ($LASTEXITCODE -ne 0) { Write-Host "Error aplicando WIM"; pause; exit 20 }
-
-# BCD
-bcdboot C:\\Windows /s S: /f UEFI
-if ($LASTEXITCODE -ne 0) { Write-Host "Error en bcdboot"; pause; exit 21 }
-
-Write-Host "Restauración UEFI completa."
-pause
-exit 0
-`;
+$wimlib = Join-Path $ScriptDir 'wimlib-imagex.exe'
+if (Test-Path $wimlib) {
+  & $wimlib apply $wim.FullName 1 C:\\ --check
+} else {
+  if ($wim.Extension -ieq '.swm') {
+    dism /Apply-Image /ImageFile:$($wim.FullName) /ApplyDir:C:\\ /Index:1
+  } else {
+    dism /Apply-Image /ImageFile:$($wim.FullName) /ApplyDir:C:\\ /Index:1 /CheckIntegrity
+  }
 }
+bcdboot C:\\Windows /s S: /f UEFI
+Write-Host "Restauracion UEFI completa."
+pause
+`;
 
-function script_restore_bios_ps1() {
-  return `# restore-bios.ps1
-$ErrorActionPreference = 'Stop'
-. "$PSScriptRoot\\common.ps1"
+const RESTORE_BIOS_PS1 = `$ErrorActionPreference = 'Stop'
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$usbRoot = Split-Path -Qualifier $ScriptDir
 
-$usbRoot = FindUsbRoot
-if (-not $usbRoot) { Write-Host "No encuentro el USB con PQTools."; pause; exit 2 }
-$wim = FindLatestWim $usbRoot
-if (-not $wim) { Write-Host "No encuentro install.wim en $usbRoot\\Capturas"; pause; exit 3 }
+$wim = Get-ChildItem -Path (Join-Path $usbRoot 'Capturas') -Recurse -Filter install.wim -EA SilentlyContinue |
+       Sort-Object LastWriteTime -Descending | Select-Object -First 1
+if (-not $wim) {
+  $wim = Get-ChildItem -Path (Join-Path $usbRoot 'Capturas') -Recurse -Filter install.swm -EA SilentlyContinue |
+         Sort-Object -Property LastWriteTime -Descending | Select-Object -First 1
+  if (-not $wim) { throw "No se encontró install.wim / .swm en $usbRoot\\Capturas" }
+}
+Write-Host "Usando imagen:" $wim.FullName
 
-Write-Host "WIM: $wim"
-$ans = Read-Host "Esto BORRARÁ el Disco 0 y restaurará BIOS/MBR. Continuar? [S/N]"
-if ($ans -notmatch '^(s|S|y|Y)$') { Write-Host "Cancelado"; exit 10 }
+$ans = Read-Host "ESTO BORRA EL DISCO 0. Continuar? (S/N)"
+if ($ans -notin @('S','s','Y','y')) { exit 10 }
 
-# Disk 0 BIOS layout
 $dp = @"
 select disk 0
 clean
@@ -144,78 +127,172 @@ create partition primary
 format quick fs=ntfs label=Windows
 assign letter=C
 active
-list volume
 exit
 "@
-$dpPath = Join-Path $env:TEMP 'bios.diskpart.txt'
-$dp | Out-File -Encoding ASCII -FilePath $dpPath
-diskpart /s "$dpPath"
+$dp | Out-File "$env:TEMP\\bios.diskpart.txt" -Encoding ASCII
+diskpart /s "$env:TEMP\\bios.diskpart.txt"
 
-# Aplicar imagen
-$wimlib = EnsureTool 'wimlib-imagex.exe'
-& "$wimlib" apply "$wim" 1 C:\\ --check
-if ($LASTEXITCODE -ne 0) { Write-Host "Error aplicando WIM"; pause; exit 20 }
-
-# BCD
+$wimlib = Join-Path $ScriptDir 'wimlib-imagex.exe'
+if (Test-Path $wimlib) {
+  & $wimlib apply $wim.FullName 1 C:\\ --check
+} else {
+  if ($wim.Extension -ieq '.swm') {
+    dism /Apply-Image /ImageFile:$($wim.FullName) /ApplyDir:C:\\ /Index:1
+  } else {
+    dism /Apply-Image /ImageFile:$($wim.FullName) /ApplyDir:C:\\ /Index:1 /CheckIntegrity
+  }
+}
 bcdboot C:\\Windows /s C: /f BIOS
-if ($LASTEXITCODE -ne 0) { Write-Host "Error en bcdboot"; pause; exit 21 }
-
-Write-Host "Restauración BIOS completa."
+Write-Host "Restauracion BIOS completa."
 pause
-exit 0
 `;
-}
 
-function resolveVendorWinpeDir() {
-  // buscamos el ISO y scripts en vendor/winpe/*
-  const dev = path.resolve(process.cwd(), 'vendor', 'winpe');
-  const prod = path.resolve(app.getAppPath(), 'vendor', 'winpe');
-  return { dev, prod };
-}
+const RESTORE_UEFI_CMD = `@echo off
+setlocal
+set WIM=%~1
+if not defined WIM (
+  for /f "delims=" %%F in ('dir /b /s "%~d0\\Capturas\\install.wim" 2^>nul') do set "WIM=%%F"
+  if not defined WIM for /f "delims=" %%F in ('dir /b /s "%~d0\\Capturas\\install.swm" 2^>nul') do set "WIM=%%F"
+)
+if not exist "%WIM%" ( echo No existe WIM & exit /b 2 )
 
-export async function installWinPEPack({ driveLetter, srcIsoPath }) {
-  if (!driveLetter) throw new Error('driveLetter requerido');
-  const root = driveLetter.endsWith('\\') ? driveLetter : driveLetter + '\\';
-  const isoTargetDir = path.win32.join(root, 'ISOs');
-  const scriptsDir = path.win32.join(root, 'PQTools', 'WinPE', 'scripts');
+echo Esto BORRARA el Disco 0 y restaurara UEFI/GPT. Continuar? (S/N)
+set /p OK=
+if /I not "%OK%"=="S" if /I not "%OK%"=="Y" exit /b 10
 
-  await ensureDirSafe(isoTargetDir);
-  await ensureDirSafe(scriptsDir);
+set TMP=%TEMP%\\uefi.diskpart.txt
+> "%TMP%" echo select disk 0
+>>"%TMP%" echo clean
+>>"%TMP%" echo convert gpt
+>>"%TMP%" echo create partition efi size=100
+>>"%TMP%" echo format quick fs=fat32 label=SYSTEM
+>>"%TMP%" echo assign letter=S
+>>"%TMP%" echo create partition msr size=16
+>>"%TMP%" echo create partition primary
+>>"%TMP%" echo format quick fs=ntfs label=Windows
+>>"%TMP%" echo assign letter=C
+>>"%TMP%" echo exit
 
-  // 1) Copiar ISO
-  let srcIso = srcIsoPath || '';
-  if (!srcIso) {
-    const { dev, prod } = resolveVendorWinpeDir();
-    const tryPaths = [
-      path.join(dev, 'PQS_WinPE.iso'),
-      path.join(prod, 'PQS_WinPE.iso')
-    ];
-    for (const p of tryPaths) {
-      try { await fsp.access(p); srcIso = p; break; } catch {}
-    }
+diskpart /s "%TMP%" || exit /b 11
+
+set WIMLIB=%~dp0wimlib-imagex.exe
+if exist "%WIMLIB%" (
+  "%WIMLIB%" apply "%WIM%" 1 C:\\ --check || exit /b 20
+) else (
+  dism /Apply-Image /ImageFile:"%WIM%" /Index:1 /ApplyDir:C:\\ || exit /b 20
+)
+
+bcdboot C:\\Windows /s S: /f UEFI || exit /b 21
+echo Restauracion UEFI completa.
+pause
+`;
+
+const RESTORE_BIOS_CMD = `@echo off
+setlocal
+set WIM=%~1
+if not defined WIM (
+  for /f "delims=" %%F in ('dir /b /s "%~d0\\Capturas\\install.wim" 2^>nul') do set "WIM=%%F"
+  if not defined WIM for /f "delims=" %%F in ('dir /b /s "%~d0\\Capturas\\install.swm" 2^>nul') do set "WIM=%%F"
+)
+if not exist "%WIM%" ( echo No existe WIM & exit /b 2 )
+
+echo Esto BORRARA el Disco 0 y restaurara BIOS/MBR. Continuar? (S/N)
+set /p OK=
+if /I not "%OK%"=="S" if /I not "%OK%"=="Y" exit /b 10
+
+set TMP=%TEMP%\\bios.diskpart.txt
+> "%TMP%" echo select disk 0
+>>"%TMP%" echo clean
+>>"%TMP%" echo convert mbr
+>>"%TMP%" echo create partition primary
+>>"%TMP%" echo format quick fs=ntfs label=Windows
+>>"%TMP%" echo assign letter=C
+>>"%TMP%" echo active
+>>"%TMP%" echo exit
+
+diskpart /s "%TMP%" || exit /b 11
+
+set WIMLIB=%~dp0wimlib-imagex.exe
+if exist "%WIMLIB%" (
+  "%WIMLIB%" apply "%WIM%" 1 C:\\ --check || exit /b 20
+) else (
+  dism /Apply-Image /ImageFile:"%WIM%" /Index:1 /ApplyDir:C:\\ || exit /b 20
+)
+
+bcdboot C:\\Windows /s C: /f BIOS || exit /b 21
+echo Restauracion BIOS completa.
+pause
+`;
+
+// API
+export async function installPackToUSB(args, opts) {
+  if (!args || !args.driveLetter) throw new Error('driveLetter requerido');
+  const root = usbRootFromLetter(args.driveLetter);
+  const dirISOs = path.join(root, 'ISOs');
+  const dirScripts = path.join(root, 'PQTools', 'WinPE', 'scripts');
+  const dirCapturas = path.join(root, 'Capturas');
+
+  await ensureDir(dirISOs);
+  await ensureDir(dirScripts);
+  await ensureDir(dirCapturas);
+
+  // ISO fuente: prioridad al parámetro, luego vendor/winpe en appPath, luego en cwd
+  let isoSrc = args.srcIsoPath;
+  if (!isoSrc) {
+    const base = (opts && opts.appPath) ? opts.appPath : process.cwd();
+    const cand1 = path.resolve(base, 'vendor', 'winpe', 'PQS_WinPE.iso');
+    const cand2 = path.resolve(process.cwd(), 'vendor', 'winpe', 'PQS_WinPE.iso');
+    isoSrc = (await exists(cand1)) ? cand1 : cand2;
   }
-  if (!srcIso) {
-    throw new Error('No se encontró vendor/winpe/PQS_WinPE.iso. Copialo a vendor/winpe primero.');
+  if (!(await exists(isoSrc))) {
+    throw new Error(`No encuentro ISO fuente en: ${isoSrc}`);
   }
-  const isoDest = path.win32.join(isoTargetDir, 'PQS_WinPE.iso');
-  await fsp.copyFile(srcIso, isoDest);
 
-  // 2) Copiar scripts embebidos (siempre actualizamos)
-  await fsp.writeFile(path.win32.join(scriptsDir, 'restore.cmd'), script_restore_cmd(), 'utf8');
-  await fsp.writeFile(path.win32.join(scriptsDir, 'common.ps1'), script_common_ps1(), 'utf8');
-  await fsp.writeFile(path.win32.join(scriptsDir, 'restore-uefi.ps1'), script_restore_uefi_ps1(), 'utf8');
-  await fsp.writeFile(path.win32.join(scriptsDir, 'restore-bios.ps1'), script_restore_bios_ps1(), 'utf8');
+  const isoDst = path.join(dirISOs, 'PQS_WinPE.iso');
+  await copyFile(isoSrc, isoDst);
 
-  // 3) README
-  const readme = `PQS Restore
-1) Bootea el USB con Ventoy.
-2) Elegí "PQS_WinPE.iso".
-3) En WinPE abrí X:\\PQTools\\WinPE\\scripts\\restore.cmd y seguí el menú.
-   - El script busca el último Capturas\\*\\install.wim del propio USB.
-   - UEFI/GPT para equipos modernos, BIOS/MBR para viejos.`;
-  await fsp.writeFile(path.win32.join(root, 'README-RESTORE.txt'), readme, 'utf8');
+  // Scripts
+  await fs.writeFile(path.join(dirScripts, 'restore.cmd'), RESTORE_CMD, 'ascii');
+  await fs.writeFile(path.join(dirScripts, 'restore-uefi.ps1'), RESTORE_UEFI_PS1, 'ascii');
+  await fs.writeFile(path.join(dirScripts, 'restore-bios.ps1'), RESTORE_BIOS_PS1, 'ascii');
+  await fs.writeFile(path.join(dirScripts, 'restore-uefi.cmd'), RESTORE_UEFI_CMD, 'ascii');
+  await fs.writeFile(path.join(dirScripts, 'restore-bios.cmd'), RESTORE_BIOS_CMD, 'ascii');
 
-  return { ok: true, isoPath: isoDest, scriptsDir };
+  // wimlib opcional: si lo tenés en vendor/winpe/wimlib-imagex.exe lo copiamos a scripts
+  let wimlibCopied = false;
+  let wl = args.srcWimlibPath;
+  if (!wl) {
+    const base = (opts && opts.appPath) ? opts.appPath : process.cwd();
+    const c1 = path.resolve(base, 'vendor', 'winpe', 'wimlib-imagex.exe');
+    const c2 = path.resolve(process.cwd(), 'vendor', 'winpe', 'wimlib-imagex.exe');
+    wl = (await exists(c1)) ? c1 : c2;
+  }
+  if (await exists(wl)) {
+    await copyFile(wl, path.join(dirScripts, 'wimlib-imagex.exe'));
+    wimlibCopied = true;
+  }
+
+  // README
+  const readme = `PQS USB – WinPE + Scripts
+
+ISOs\\PQS_WinPE.iso   -> booteá esto desde Ventoy
+PQTools\\WinPE\\scripts\\restore.cmd  -> menú de restauración
+Capturas\\  -> dejá acá las carpetas con tus install.wim / .swm
+
+Notas:
+- UEFI = opción 1, BIOS = opción 2.
+- BORRA el Disco 0 del equipo destino.
+- Si el USB es FAT32 y el WIM > 4 GB, dividir en .SWM antes de restaurar (o usar exFAT/NTFS).
+`;
+  await fs.writeFile(path.join(root, 'README-RESTORE.txt'), readme, 'utf8');
+
+  return {
+    ok: true,
+    root,
+    isoDst,
+    scriptsDir: dirScripts,
+    copied: { iso: true, scripts: true, wimlib: wimlibCopied },
+  };
 }
 
-export default { installWinPEPack };
+export default { installPackToUSB };

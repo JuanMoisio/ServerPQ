@@ -1,131 +1,68 @@
-﻿// services/repo.js — índice, descargas (con progreso) y verificación SHA-256
-import { createHash } from 'node:crypto';
+﻿// services/repo.js — índice simple + descarga con progreso + verificación SHA-256
 import { promises as fsp } from 'node:fs';
+import fs from 'node:fs';
 import path from 'node:path';
-import { Readable } from 'node:stream';
-import { finished } from 'node:stream/promises';
+import crypto from 'node:crypto';
 
-function fetchWithTimeout(url, ms = 4000, opts = {}) {
-  const ac = new AbortController();
-  const id = setTimeout(() => ac.abort(), ms);
-  return fetch(url, { ...opts, signal: ac.signal }).finally(() => clearTimeout(id));
+export async function fetchIndex(baseUrl) {
+  const url = new URL('/', baseUrl).toString();
+  const idxUrl = new URL('index.json', url).toString();
+  const r = await fetch(idxUrl, { signal: AbortSignal.timeout(8000) });
+  if (!r.ok) throw new Error(`HTTP ${r.status} al leer ${idxUrl}`);
+  return await r.json();
 }
 
-export async function fetchIndex(baseUrl = 'http://PQS/') {
-  const url = new URL('index.json', baseUrl.endsWith('/') ? baseUrl : baseUrl + '/').toString();
-  const res = await fetchWithTimeout(url, 4000);
-  if (!res.ok) throw new Error(`Repo index failed ${res.status}`);
-  const data = await res.json();
-  const items = (data?.items || []).map((it) => ({
-    name: it.name,
-    url: new URL(it.url, baseUrl).toString(),
-    sha256: it.sha256 || null
-  }));
-  return { items };
-}
-
-export async function downloadTo(fileUrl, outDir) {
-  const res = await fetchWithTimeout(fileUrl, 30_000);
-  if (!res.ok) throw new Error(`Download failed ${res.status}`);
-  await fsp.mkdir(outDir, { recursive: true });
-  const filename = decodeURIComponent(new URL(fileUrl).pathname.split('/').pop());
-  const outPath = path.join(outDir, filename);
-  const fh = await fsp.open(outPath, 'w');
-  const ws = fh.createWriteStream();
-  Readable.fromWeb(res.body).pipe(ws);
-  await finished(ws);
-  await fh.close();
-  return outPath;
+export async function verifySha256(filePath, expected) {
+  const h = crypto.createHash('sha256');
+  await new Promise((resolve, reject) => {
+    const s = fs.createReadStream(filePath);
+    s.on('data', (c) => h.update(c));
+    s.on('error', reject);
+    s.on('end', resolve);
+  });
+  const digest = h.digest('hex').toUpperCase();
+  return { ok: expected ? digest === expected.toUpperCase() : true, digest };
 }
 
 export async function downloadToWithProgress(fileUrl, outDir, onProgress) {
-  const res = await fetchWithTimeout(fileUrl, 30_000);
-  if (!res.ok) throw new Error(`Download failed ${res.status}`);
-
   await fsp.mkdir(outDir, { recursive: true });
-  const filename = decodeURIComponent(new URL(fileUrl).pathname.split('/').pop());
-  const outPath = path.join(outDir, filename);
-
-  const total = Number(res.headers.get('content-length') || 0);
-  let received = 0;
-
-  const fh = await fsp.open(outPath, 'w');
-  const ws = fh.createWriteStream();
-
-  const rs = Readable.fromWeb(res.body);
-  rs.on('data', (chunk) => {
-    received += chunk.length || 0;
-    if (onProgress) {
-      const percent = total ? Math.floor((received / total) * 100) : null;
-      onProgress({ received, total, percent, filename });
-    }
-  });
-
-  rs.pipe(ws);
-  await finished(ws);
-  await fh.close();
-  if (onProgress) onProgress({ received, total, percent: 100, filename });
-
-  return outPath;
+  const filename = decodeURIComponent(new URL(fileUrl).pathname.split('/').pop() || 'file.bin');
+  const dest = path.join(outDir, filename);
+  const res = await downloadToPathWithProgress(fileUrl, dest, onProgress);
+  return res.outPath;
 }
 
 export async function downloadToPathWithProgress(fileUrl, destPath, onProgress) {
-  const res = await fetchWithTimeout(fileUrl, 30_000);
-  if (!res.ok) throw new Error(`Download failed ${res.status}`);
+  const resp = await fetch(fileUrl);
+  if (!resp.ok || !resp.body) throw new Error(`HTTP ${resp.status} al bajar ${fileUrl}`);
+  await fsp.mkdir(path.dirname(destPath), { recursive: true });
 
-  // Crear dir solo si NO es raíz (E:\)
-  const dir = path.win32.dirname(destPath);
-  const isRoot = /^[A-Za-z]:\\$/.test(dir);
-  if (!isRoot) {
-    await fsp.mkdir(dir, { recursive: true });
-  } else {
-    // root: asegurate que existe / es accesible (si no, tirará al abrir el archivo)
-    try { await fsp.access(dir); } catch { /* ignoramos: si no existe, fallará al abrir */ }
-  }
-
-  const total = Number(res.headers.get('content-length') || 0);
+  const total = Number(resp.headers.get('content-length') || 0);
   let received = 0;
 
-  const fh = await fsp.open(destPath, 'w');        // crea/abre el archivo directamente en E:\filename
-  const ws = fh.createWriteStream();
-  const rs = Readable.fromWeb(res.body);
-  const hasher = createHash('sha256');
-
-  rs.on('data', (chunk) => {
-    const len = chunk.length || 0;
-    received += len;
-    hasher.update(chunk);
-    if (onProgress) {
-      const percent = total ? Math.floor((received / total) * 100) : null;
-      onProgress({ received, total, percent, filename: path.basename(destPath) });
-    }
+  await new Promise((resolve, reject) => {
+    const ws = fs.createWriteStream(destPath);
+    resp.body.on('data', (chunk) => {
+      received += chunk.length;
+      const percent = total ? Math.round((received / total) * 100) : 0;
+      onProgress?.({ received, total, percent, filename: path.basename(destPath) });
+    });
+    resp.body.on('error', reject);
+    resp.body.on('end', resolve);
+    resp.body.pipe(ws);
   });
 
-  rs.pipe(ws);
-  await finished(ws);
-  await fh.close();
-
-  const digest = hasher.digest('hex').toUpperCase();
-  if (onProgress) onProgress({ received, total, percent: 100, filename: path.basename(destPath) });
+  // hash oportuno (por si quieren mostrar)
+  let digest = null;
+  try {
+    const v = await verifySha256(destPath, '');
+    digest = v.digest;
+  } catch {}
 
   return { outPath: destPath, digest };
 }
 
-
-export async function verifySha256(filePath, expected) {
-  const hash = createHash('sha256');
-  const fh = await fsp.open(filePath, 'r');
-  await new Promise((resolve, reject) => {
-    const rs = fh.createReadStream();
-    rs.on('data', (chunk) => hash.update(chunk));
-    rs.on('error', reject);
-    rs.on('end', resolve);
-  });
-  await fh.close();
-  const digest = hash.digest('hex').toUpperCase();
-  const exp = String(expected || '').trim().toUpperCase();
-  return { ok: !!exp && digest === exp, digest };
-}
-
-// También dejo default para máxima compat
-export default { fetchIndex, downloadTo, downloadToWithProgress, downloadToPathWithProgress, verifySha256 };
+export default {
+  fetchIndex, verifySha256,
+  downloadToWithProgress, downloadToPathWithProgress
+};

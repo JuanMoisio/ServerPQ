@@ -1,31 +1,18 @@
-﻿// electron/preload.js — puente IPC
+﻿// electron/preload.js — puente seguro a IPC
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
-  // Drives
+  // DRIVES
   listDrives: () => ipcRenderer.invoke('drives:list'),
 
-  // Ventoy con progreso
+  // VENTOY
   ventoyStart: (payload) => ipcRenderer.invoke('ventoy:start', payload),
-  ventoyCancelProgress: () => ipcRenderer.invoke('ventoy:cancelProgress'),
-  onVentoyProgress: (cb) => {
-    const h = (_e, data) => cb(data);
-    ipcRenderer.on('ventoy:progress', h);
-    return () => ipcRenderer.removeListener('ventoy:progress', h);
-  },
-  onVentoyDone: (cb) => {
-    const h = (_e, data) => cb(data);
-    ipcRenderer.on('ventoy:done', h);
-    return () => ipcRenderer.removeListener('ventoy:done', h);
-  },
-
-  // Ventoy legacy + helpers
-  ventoyRun: (payload) => ipcRenderer.invoke('ventoy:run', payload),
-  ventoyCopyIso: (payload) => ipcRenderer.invoke('ventoy:copyIso', payload),
+  ventoyRun:   (payload) => ipcRenderer.invoke('ventoy:run', payload), // opcional (bloqueante)
   ventoyDefaultPath: () => ipcRenderer.invoke('ventoy:defaultPath'),
-  ventoyPickExe: () => ipcRenderer.invoke('ventoy:pickExe'),
+  ventoyPickExe:     () => ipcRenderer.invoke('ventoy:pickExe'),
+  ventoyProbe: (letter, label) => ipcRenderer.invoke('ventoy:probe', { letter, label }),
 
-  // Repo + hash + descarga con progreso
+  // REPO + HASH + DESCARGA
   repoIndex: (baseUrl) => ipcRenderer.invoke('repo:index', baseUrl),
   hashVerify: (payload) => ipcRenderer.invoke('hash:verify', payload),
   repoDownloadStart: (payload) => ipcRenderer.invoke('repo:downloadStart', payload),
@@ -40,8 +27,8 @@ contextBridge.exposeInMainWorld('api', {
     return () => ipcRenderer.removeListener('repo:done', h);
   },
 
-  // PQTools
+  // PQTOOLS + WINPE
   pqtoolsDefaultSrc: () => ipcRenderer.invoke('pqtools:defaultSrc'),
-  pqtoolsInstall: (payload) => ipcRenderer.invoke('pqtools:install', payload),
-  winpeInstall: (payload) => ipcRenderer.invoke('winpe:installPack', payload),
+  pqtoolsInstall:    (payload) => ipcRenderer.invoke('pqtools:install', payload),
+  winpeInstallPack:  (args) => ipcRenderer.invoke('winpe:installPack', args),
 });

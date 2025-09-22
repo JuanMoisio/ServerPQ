@@ -56,3 +56,6 @@ vendor/ventoy/**         # no versionar binarios de Ventoy
 # Cobertura/pruebas
 coverage/
 .nyc_output/
+
+IsoMaker/vendor/winpe/**
+*.iso
