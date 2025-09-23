@@ -64,7 +64,6 @@ async function createWindow() {
   });
   log('loadURL ->', startUrl);
   await win.loadURL(startUrl);
-  if (isDev) win.webContents.openDevTools({ mode: 'detach' });
   log('createWindow: done');
 }
 
