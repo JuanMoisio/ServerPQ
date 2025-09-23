@@ -2,3 +2,11 @@
 # ISOs
 **/*.iso
 IsoMaker/vendor/winpe/*.iso
+
+# Node/Electron
+node_modules/
+**/node_modules/
+dist/
+dist-electron/
+build/
+out/
