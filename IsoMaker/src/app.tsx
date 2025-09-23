@@ -3,7 +3,7 @@
 type Drive = { letter: string; volumeLabel?: string; sizeDisplay: number; model?: string; physIndex: number };
 declare global { interface Window { api: any } }
 
-export default function App() {
+export function App() {
   const [drives, setDrives]   = useState<Drive[]>([]);
   const [selected, setSelected] = useState<string>('');
   const [log, setLog]         = useState<string>('');
@@ -100,3 +100,5 @@ export default function App() {
     </div>
   );
 }
+
+export default App;

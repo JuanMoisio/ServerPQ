@@ -1,34 +1,57 @@
-﻿// electron/preload.js — puente seguro a IPC
+﻿// CommonJS preload compatible con contextIsolation:true
 const { contextBridge, ipcRenderer } = require('electron');
+
+const invoke = (ch, args) => ipcRenderer.invoke(ch, args);
+const on     = (ch, cb)   => ipcRenderer.on(ch, cb);
 
 contextBridge.exposeInMainWorld('api', {
   // DRIVES
-  listDrives: () => ipcRenderer.invoke('drives:list'),
+  async listDrives() {
+    return await invoke('drives:list');
+  },
 
   // VENTOY
-  ventoyStart: (payload) => ipcRenderer.invoke('ventoy:start', payload),
-  ventoyRun:   (payload) => ipcRenderer.invoke('ventoy:run', payload), // opcional (bloqueante)
-  ventoyDefaultPath: () => ipcRenderer.invoke('ventoy:defaultPath'),
-  ventoyPickExe:     () => ipcRenderer.invoke('ventoy:pickExe'),
-  ventoyProbe: (letter, label) => ipcRenderer.invoke('ventoy:probe', { letter, label }),
-
-  // REPO + HASH + DESCARGA
-  repoIndex: (baseUrl) => ipcRenderer.invoke('repo:index', baseUrl),
-  hashVerify: (payload) => ipcRenderer.invoke('hash:verify', payload),
-  repoDownloadStart: (payload) => ipcRenderer.invoke('repo:downloadStart', payload),
-  onRepoProgress: (cb) => {
-    const h = (_e, data) => cb(data);
-    ipcRenderer.on('repo:progress', h);
-    return () => ipcRenderer.removeListener('repo:progress', h);
+  async ventoyDefaultPath() {
+    return await invoke('ventoy:defaultPath');
   },
-  onRepoDone: (cb) => {
-    const h = (_e, data) => cb(data);
-    ipcRenderer.on('repo:done', h);
-    return () => ipcRenderer.removeListener('repo:done', h);
+  async ventoyPickExe() {
+    return await invoke('ventoy:pickExe');
+  },
+  async ventoyStart({ exePath, mode = 'install', target, flags = {} }) {
+    const payload = {
+      drive: target,                           // "E", "E:", "E:\\" o el objeto del drive
+      exePath,
+      gpt: flags?.gpt ?? true,
+      nosb: flags?.nosb ?? true,
+      nousbcheck: flags?.nousbcheck ?? false,
+    };
+    return await invoke('ventoy:start', payload);
+  },
+  onVentoyProgress(cb) { on('ventoy:progress', cb); },
+
+  async ventoyProbe(letter, label) {
+    return await invoke('ventoy:probe', { letter, label });
   },
 
-  // PQTOOLS + WINPE
-  pqtoolsDefaultSrc: () => ipcRenderer.invoke('pqtools:defaultSrc'),
-  pqtoolsInstall:    (payload) => ipcRenderer.invoke('pqtools:install', payload),
-  winpeInstallPack:  (args) => ipcRenderer.invoke('winpe:installPack', args),
+  // REPO
+  async repoIndex(baseUrl) { return await invoke('repo:index', baseUrl); },
+  async hashVerify({ filePath, sha256 }) {
+    return await invoke('hash:verify', { filePath, sha256 });
+  },
+  onRepoProgress(cb) { on('repo:progress', cb); },
+  onRepoDone(cb)     { on('repo:done', cb); },
+  async repoDownloadStart(payload) {
+    return await invoke('repo:downloadStart', payload);
+  },
+
+  // PQTOOLS
+  async pqtoolsDefaultSrc() { return await invoke('pqtools:defaultSrc'); },
+  async pqtoolsInstall({ driveLetter, srcDir }) {
+    return await invoke('pqtools:install', { driveLetter: driveLetter, srcDir });
+  },
+
+  // WINPE
+  async winpeInstallPack({ driveLetter, isoRelative, scriptsRelative } = {}) {
+    return await invoke('winpe:installPack', { driveLetter: driveLetter, isoRelative, scriptsRelative });
+  },
 });
