@@ -1,0 +1,4 @@
+
+# ISOs
+**/*.iso
+IsoMaker/vendor/winpe/*.iso
