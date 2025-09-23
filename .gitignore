@@ -1,0 +1,13 @@
+
+# No subir ISOs
+vendor/winpe/*.iso
+*.iso
+
+# Node/Electron
+node_modules/
+**/node_modules/
+.dist/
+dist/
+build/
+out/
+.DS_Store
