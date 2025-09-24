@@ -4690,3 +4690,269 @@
 [2025/09/23 16:43:17.851] E: is belong to phydrive1
 [2025/09/23 16:43:17.856] Ventoy_CLI_Update [SUCCESS]
 [2025/09/23 16:43:17.857] ######### Ventoy CLI SUCCESS #########
+[2025/09/24 09:30:39.563] 
+##################################################################################
+############################## Ventoy2DiskX86 CLI MODE #############################
+##################################################################################
+[2025/09/24 09:30:39.563] Current Directory <C:\Users\jmoisio\AppData\Local\Temp\ventoy-cli-UaR5Gn>
+[2025/09/24 09:30:39.563] Exe file path <C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win\Ventoy2Disk.exe>
+[2025/09/24 09:30:39.563] Change current dir to exe <C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win>
+[2025/09/24 09:30:39.564] Current directory:<C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win>
+[2025/09/24 09:30:39.566] ######### Current Ventoy Version: Ventoy2DiskX86 1.0.99 ########
+[2025/09/24 09:30:39.569] Windows Version: <<Windows 11 Pro, 64-bit (Build 26100.6584)>>
+[2025/09/24 09:30:39.570] Get PhyDrive by logical drive E:
+[2025/09/24 09:30:39.571] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:250289827840
+[2025/09/24 09:30:39.571] Ventoy CLI update PhyDrive:1 GPT SecureBoot:0 ReserveSpace:0MB USBCheck:1 FS:EXFAT NonDest:0
+[2025/09/24 09:30:41.086] Create file Handle:0000015C \\.\PhysicalDrive1 status:0
+[2025/09/24 09:30:41.097] PHYSICALDRIVE1 size 250324451328 bytes
+[2025/09/24 09:30:41.098] PhyDrive:1 BusType:USB  Removable:1 Size:256GB(250324451328) Name:SanDisk SanDisk 3.2 Gen1
+[2025/09/24 09:30:41.111] Create file Handle:00000160 \\.\PhysicalDrive1 status:0
+[2025/09/24 09:30:41.180] Read MBR Ret:1 Size:512 code:183
+[2025/09/24 09:30:41.183] =========== Disk1 GPT Partition 1 ============
+[2025/09/24 09:30:41.183] PartTbl.PartType = {ebd0a0a2-b9e5-4433-87c0-68b6b72699c7}
+[2025/09/24 09:30:41.184] PartTbl.PartGuid = {129255e1-5da7-43db-b964-d94e421c4765}
+[2025/09/24 09:30:41.184] PartTbl.StartLBA = 2048
+[2025/09/24 09:30:41.185] PartTbl.LastLBA = 488849367
+[2025/09/24 09:30:41.185] PartTbl.Attribute = 0x0
+[2025/09/24 09:30:41.185] PartTbl.Name = Ventoy
+[2025/09/24 09:30:41.187] =========== Disk1 GPT Partition 2 ============
+[2025/09/24 09:30:41.187] PartTbl.PartType = {ebd0a0a2-b9e5-4433-87c0-68b6b72699c7}
+[2025/09/24 09:30:41.188] PartTbl.PartGuid = {2c48e05f-bce0-4413-b7c3-faae6197cb43}
+[2025/09/24 09:30:41.188] PartTbl.StartLBA = 488849368
+[2025/09/24 09:30:41.189] PartTbl.LastLBA = 488914903
+[2025/09/24 09:30:41.189] PartTbl.Attribute = 0x8000000000000000
+[2025/09/24 09:30:41.189] PartTbl.Name = VTOYEFI
+[2025/09/24 09:30:41.190] PhysicalDrive1 is ventoy disk
+[2025/09/24 09:30:41.190] QueryDosDeviceA success \Device\Harddisk1\DR36
+[2025/09/24 09:30:41.212] [0] CreateFileA \\.\PhysicalDrive1 code:0 00000158
+[2025/09/24 09:30:41.213] Parse FAT fs...
+[2025/09/24 09:30:41.235] attach media success...
+[2025/09/24 09:30:43.542] GetVentoyVerInPhyDrive rc=0...
+[2025/09/24 09:30:43.543] VentoyVerInPhyDrive 1 is <1.0.99>...
+[2025/09/24 09:30:43.582] PhyDrive 1 is Ventoy Disk ver:1.0.99 SecureBoot:0
+[2025/09/24 09:30:43.583] GetVentoyFsNameInPhyDrive  not found
+[2025/09/24 09:30:43.583] Ventoy_CLI_Update start ...
+[2025/09/24 09:30:43.584] #####################################################
+[2025/09/24 09:30:43.584] UpdateVentoy2PhyDrive try1 GPT PhyDrive1 <<SanDisk SanDisk 3.2 Gen1 256GB>>
+[2025/09/24 09:30:43.585] #####################################################
+[2025/09/24 09:30:43.586] Lock disk for umount ............................ 
+[2025/09/24 09:30:43.587] QueryDosDeviceA success \Device\Harddisk1\DR36
+[2025/09/24 09:30:43.593] [0] CreateFileA \\.\PhysicalDrive1 code:0 0000015C
+[2025/09/24 09:30:43.595] FSCTL_LOCK_VOLUME success
+[2025/09/24 09:30:43.601] GPT StartSector in PartTbl:488849368
+[2025/09/24 09:30:43.602] GPT Reserved Disk Space:0 MB
+[2025/09/24 09:30:43.607] Try to delete VtoyEFI mount point for PhyDrive 1
+
+[2025/09/24 09:30:43.608] LogicalDrive:\\.\C: PhyDrive:0 Num:1 Offset:240123904 ExtentLength:569646252032
+[2025/09/24 09:30:43.608] LogicalDrive:\\.\D: PhyDrive:0 Num:1 Offset:570750402560 ExtentLength:429453737984
+[2025/09/24 09:30:43.635] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:250289827840
+[2025/09/24 09:30:43.635] E: is belong to phydrive1
+[2025/09/24 09:30:43.636] LogicalDrive:\\.\F: PhyDrive:1 Num:1 Offset:250290876416 ExtentLength:33554432
+[2025/09/24 09:30:43.636] F: is belong to phydrive1
+[2025/09/24 09:30:43.656] F:\ is ventoy logical drive
+[2025/09/24 09:30:43.657] Delete mountpoint F:\ ret:1 code:0
+[2025/09/24 09:30:43.677] TryId=1 EFI GPT partition type is 0x8000000000000000
+[2025/09/24 09:30:43.681] Change GPT partition type to ESP
+[2025/09/24 09:30:47.969] VDS init OK, service 00D5C9AC
+[2025/09/24 09:30:48.007] Callback 2 process for disk2 <\\?\PhysicalDrive1>
+[2025/09/24 09:30:51.157] VDS_ChangeVtoyEFI2ESP 1 ret:1 (SUCCESS)
+[2025/09/24 09:30:54.164] Lock disk for update ............................ 
+[2025/09/24 09:30:54.165] QueryDosDeviceA success \Device\Harddisk1\DR36
+[2025/09/24 09:30:54.545] [0] CreateFileA \\.\PhysicalDrive1 code:0 00000270
+[2025/09/24 09:30:54.545] Opened \\.\PhysicalDrive1 for exclusive write access
+[2025/09/24 09:30:54.549] FSCTL_LOCK_VOLUME success
+[2025/09/24 09:30:54.551] Lock volume for update .......................... 
+[2025/09/24 09:30:54.551] Volume not found, maybe not supported
+[2025/09/24 09:30:54.552] Try write part2 bRet:0 dwSize:0 code:5
+[2025/09/24 09:30:54.553] TryWritePart2 agagin ...
+[2025/09/24 09:30:57.560] Try write part2 bRet:0 dwSize:0 code:5
+[2025/09/24 09:30:57.560] TryWritePart2 failed ....
+[2025/09/24 09:30:57.562] FindProcessOccupyDisk for PhyDrive 1
+[2025/09/24 09:30:57.562] QueryDosDeviceA success \Device\Harddisk1\DR36
+[2025/09/24 09:30:57.645] handles->NumberOfHandles = 159036
+[2025/09/24 09:30:57.645] NOTE: Could not identify the process(es) or service(s) accessing \Device\Harddisk1\DR36
+[2025/09/24 09:30:57.649] Recover GPT partition type to basic
+[2025/09/24 09:30:57.710] VDS init OK, service 00D5CE2C
+[2025/09/24 09:30:57.995] Callback 2 process for disk2 <\\?\PhysicalDrive1>
+[2025/09/24 09:30:59.567] VDS_ChangeVtoyEFI2Basic 1 ret:1 (SUCCESS)
+[2025/09/24 09:30:59.568] This time update failed, now wait and retry...
+[2025/09/24 09:31:03.577] Now retry to update...
+[2025/09/24 09:31:03.579] #####################################################
+[2025/09/24 09:31:03.579] UpdateVentoy2PhyDrive try2 GPT PhyDrive1 <<SanDisk SanDisk 3.2 Gen1 256GB>>
+[2025/09/24 09:31:03.580] #####################################################
+[2025/09/24 09:31:03.580] Lock disk for umount ............................ 
+[2025/09/24 09:31:03.581] QueryDosDeviceA failed error:2
+[2025/09/24 09:31:03.582] [0] CreateFileA \\.\PhysicalDrive1 code:2 FFFFFFFF
+[2025/09/24 09:31:03.582] Could not open \\.\PhysicalDrive1 183
+[2025/09/24 09:31:03.583] Can get handle of ???, maybe some process control it.
+[2025/09/24 09:31:03.583] Failed to open physical disk
+[2025/09/24 09:31:04.585] Now retry to update...
+[2025/09/24 09:31:04.586] #####################################################
+[2025/09/24 09:31:04.586] UpdateVentoy2PhyDrive try3 GPT PhyDrive1 <<SanDisk SanDisk 3.2 Gen1 256GB>>
+[2025/09/24 09:31:04.587] #####################################################
+[2025/09/24 09:31:04.589] Lock disk for umount ............................ 
+[2025/09/24 09:31:04.590] QueryDosDeviceA failed error:2
+[2025/09/24 09:31:04.590] [0] CreateFileA \\.\PhysicalDrive1 code:2 FFFFFFFF
+[2025/09/24 09:31:04.591] Could not open \\.\PhysicalDrive1 183
+[2025/09/24 09:31:04.591] Can get handle of ???, maybe some process control it.
+[2025/09/24 09:31:04.592] Failed to open physical disk
+[2025/09/24 09:31:07.606] Now retry to update...
+[2025/09/24 09:31:07.607] #####################################################
+[2025/09/24 09:31:07.608] UpdateVentoy2PhyDrive try4 GPT PhyDrive1 <<SanDisk SanDisk 3.2 Gen1 256GB>>
+[2025/09/24 09:31:07.609] #####################################################
+[2025/09/24 09:31:07.610] Lock disk for umount ............................ 
+[2025/09/24 09:31:07.611] QueryDosDeviceA failed error:2
+[2025/09/24 09:31:07.611] [0] CreateFileA \\.\PhysicalDrive1 code:2 FFFFFFFF
+[2025/09/24 09:31:07.611] Could not open \\.\PhysicalDrive1 183
+[2025/09/24 09:31:07.612] Can get handle of ???, maybe some process control it.
+[2025/09/24 09:31:07.612] Failed to open physical disk
+[2025/09/24 09:31:07.613] Ventoy_CLI_Update [FAILED]
+[2025/09/24 09:31:07.615] [ERROR] ######### Ventoy CLI FAILED #########
+[2025/09/24 11:07:47.160] 
+##################################################################################
+############################## Ventoy2DiskX86 CLI MODE #############################
+##################################################################################
+[2025/09/24 11:07:47.160] Current Directory <C:\Users\jmoisio\AppData\Local\Temp\ventoy-cli-GGSNSl>
+[2025/09/24 11:07:47.160] Exe file path <C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win\Ventoy2Disk.exe>
+[2025/09/24 11:07:47.160] Change current dir to exe <C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win>
+[2025/09/24 11:07:47.163] Current directory:<C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win>
+[2025/09/24 11:07:47.163] ######### Current Ventoy Version: Ventoy2DiskX86 1.0.99 ########
+[2025/09/24 11:07:47.167] Windows Version: <<Windows 11 Pro, 64-bit (Build 26100.6584)>>
+[2025/09/24 11:07:47.168] Get PhyDrive by logical drive E:
+[2025/09/24 11:07:47.169] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:250289827840
+[2025/09/24 11:07:47.171] Ventoy CLI update PhyDrive:1 GPT SecureBoot:0 ReserveSpace:0MB USBCheck:1 FS:EXFAT NonDest:0
+[2025/09/24 11:07:47.175] Create file Handle:00000160 \\.\PhysicalDrive1 status:0
+[2025/09/24 11:07:47.176] PHYSICALDRIVE1 size 250324451328 bytes
+[2025/09/24 11:07:47.177] PhyDrive:1 BusType:USB  Removable:1 Size:256GB(250324451328) Name:SanDisk SanDisk 3.2 Gen1
+[2025/09/24 11:07:47.180] Create file Handle:00000164 \\.\PhysicalDrive1 status:0
+[2025/09/24 11:07:47.613] Read MBR Ret:1 Size:512 code:183
+[2025/09/24 11:07:47.624] =========== Disk1 GPT Partition 1 ============
+[2025/09/24 11:07:47.625] PartTbl.PartType = {ebd0a0a2-b9e5-4433-87c0-68b6b72699c7}
+[2025/09/24 11:07:47.625] PartTbl.PartGuid = {129255e1-5da7-43db-b964-d94e421c4765}
+[2025/09/24 11:07:47.626] PartTbl.StartLBA = 2048
+[2025/09/24 11:07:47.626] PartTbl.LastLBA = 488849367
+[2025/09/24 11:07:47.628] PartTbl.Attribute = 0x0
+[2025/09/24 11:07:47.628] PartTbl.Name = Ventoy
+[2025/09/24 11:07:47.629] =========== Disk1 GPT Partition 2 ============
+[2025/09/24 11:07:47.629] PartTbl.PartType = {ebd0a0a2-b9e5-4433-87c0-68b6b72699c7}
+[2025/09/24 11:07:47.630] PartTbl.PartGuid = {2c48e05f-bce0-4413-b7c3-faae6197cb43}
+[2025/09/24 11:07:47.630] PartTbl.StartLBA = 488849368
+[2025/09/24 11:07:47.630] PartTbl.LastLBA = 488914903
+[2025/09/24 11:07:47.631] PartTbl.Attribute = 0x8000000000000000
+[2025/09/24 11:07:47.631] PartTbl.Name = VTOYEFI
+[2025/09/24 11:07:47.632] PhysicalDrive1 is ventoy disk
+[2025/09/24 11:07:47.632] QueryDosDeviceA success \Device\Harddisk1\DR40
+[2025/09/24 11:07:47.637] [0] CreateFileA \\.\PhysicalDrive1 code:0 00000164
+[2025/09/24 11:07:47.638] Parse FAT fs...
+[2025/09/24 11:07:47.709] attach media success...
+[2025/09/24 11:07:49.966] GetVentoyVerInPhyDrive rc=0...
+[2025/09/24 11:07:49.967] VentoyVerInPhyDrive 1 is <1.0.99>...
+[2025/09/24 11:07:50.007] PhyDrive 1 is Ventoy Disk ver:1.0.99 SecureBoot:0
+[2025/09/24 11:07:50.008] GetVentoyFsNameInPhyDrive  not found
+[2025/09/24 11:07:50.008] Ventoy_CLI_Update start ...
+[2025/09/24 11:07:50.009] #####################################################
+[2025/09/24 11:07:50.009] UpdateVentoy2PhyDrive try1 GPT PhyDrive1 <<SanDisk SanDisk 3.2 Gen1 256GB>>
+[2025/09/24 11:07:50.009] #####################################################
+[2025/09/24 11:07:50.011] Lock disk for umount ............................ 
+[2025/09/24 11:07:50.012] QueryDosDeviceA success \Device\Harddisk1\DR40
+[2025/09/24 11:07:50.018] [0] CreateFileA \\.\PhysicalDrive1 code:0 00000168
+[2025/09/24 11:07:50.019] FSCTL_LOCK_VOLUME success
+[2025/09/24 11:07:50.026] GPT StartSector in PartTbl:488849368
+[2025/09/24 11:07:50.027] GPT Reserved Disk Space:0 MB
+[2025/09/24 11:07:50.036] Try to delete VtoyEFI mount point for PhyDrive 1
+
+[2025/09/24 11:07:50.037] LogicalDrive:\\.\C: PhyDrive:0 Num:1 Offset:240123904 ExtentLength:569646252032
+[2025/09/24 11:07:50.037] LogicalDrive:\\.\D: PhyDrive:0 Num:1 Offset:570750402560 ExtentLength:429453737984
+[2025/09/24 11:07:50.068] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:250289827840
+[2025/09/24 11:07:50.069] E: is belong to phydrive1
+[2025/09/24 11:07:50.070] LogicalDrive:\\.\F: PhyDrive:1 Num:1 Offset:250290876416 ExtentLength:33554432
+[2025/09/24 11:07:50.070] F: is belong to phydrive1
+[2025/09/24 11:07:50.071] DeviceIoControl IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS failed \\.\G:, error:50
+[2025/09/24 11:07:50.080] F:\ is ventoy logical drive
+[2025/09/24 11:07:50.081] Delete mountpoint F:\ ret:1 code:0
+[2025/09/24 11:07:50.102] TryId=1 EFI GPT partition type is 0x8000000000000000
+[2025/09/24 11:07:50.104] Change GPT partition type to ESP
+[2025/09/24 11:07:54.520] VDS init OK, service 0158C46C
+[2025/09/24 11:07:54.560] Callback 2 process for disk2 <\\?\PhysicalDrive1>
+[2025/09/24 11:07:57.724] VDS_ChangeVtoyEFI2ESP 1 ret:1 (SUCCESS)
+[2025/09/24 11:08:00.726] Lock disk for update ............................ 
+[2025/09/24 11:08:00.726] QueryDosDeviceA success \Device\Harddisk1\DR40
+[2025/09/24 11:08:00.902] [0] CreateFileA \\.\PhysicalDrive1 code:0 00000270
+[2025/09/24 11:08:00.906] Opened \\.\PhysicalDrive1 for exclusive write access
+[2025/09/24 11:08:00.908] FSCTL_LOCK_VOLUME success
+[2025/09/24 11:08:00.910] Lock volume for update .......................... 
+[2025/09/24 11:08:00.910] Volume not found, maybe not supported
+[2025/09/24 11:08:00.910] Try write part2 bRet:0 dwSize:0 code:5
+[2025/09/24 11:08:00.912] TryWritePart2 agagin ...
+[2025/09/24 11:08:03.915] Try write part2 bRet:0 dwSize:0 code:5
+[2025/09/24 11:08:03.916] TryWritePart2 failed ....
+[2025/09/24 11:08:03.916] FindProcessOccupyDisk for PhyDrive 1
+[2025/09/24 11:08:03.916] QueryDosDeviceA success \Device\Harddisk1\DR40
+[2025/09/24 11:08:03.978] handles->NumberOfHandles = 161911
+[2025/09/24 11:08:03.978] NOTE: Could not identify the process(es) or service(s) accessing \Device\Harddisk1\DR40
+[2025/09/24 11:08:03.994] Recover GPT partition type to basic
+[2025/09/24 11:08:04.044] VDS init OK, service 0158C2BC
+[2025/09/24 11:08:04.538] Callback 2 process for disk2 <\\?\PhysicalDrive1>
+[2025/09/24 11:08:06.096] VDS_ChangeVtoyEFI2Basic 1 ret:1 (SUCCESS)
+[2025/09/24 11:08:06.096] This time update failed, now wait and retry...
+[2025/09/24 11:08:10.105] Now retry to update...
+[2025/09/24 11:08:10.105] #####################################################
+[2025/09/24 11:08:10.105] UpdateVentoy2PhyDrive try2 GPT PhyDrive1 <<SanDisk SanDisk 3.2 Gen1 256GB>>
+[2025/09/24 11:08:10.107] #####################################################
+[2025/09/24 11:08:10.107] Lock disk for umount ............................ 
+[2025/09/24 11:08:10.109] QueryDosDeviceA success \Device\Harddisk1\DR40
+[2025/09/24 11:08:10.903] [0] CreateFileA \\.\PhysicalDrive1 code:0 00000264
+[2025/09/24 11:08:10.905] FSCTL_LOCK_VOLUME success
+[2025/09/24 11:08:10.905] GPT StartSector in PartTbl:488849368
+[2025/09/24 11:08:10.905] GPT Reserved Disk Space:0 MB
+[2025/09/24 11:08:10.905] Try to delete VtoyEFI mount point for PhyDrive 1
+
+[2025/09/24 11:08:10.905] LogicalDrive:\\.\C: PhyDrive:0 Num:1 Offset:240123904 ExtentLength:569646252032
+[2025/09/24 11:08:10.905] LogicalDrive:\\.\D: PhyDrive:0 Num:1 Offset:570750402560 ExtentLength:429453737984
+[2025/09/24 11:08:10.912] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:250289827840
+[2025/09/24 11:08:10.912] E: is belong to phydrive1
+[2025/09/24 11:08:10.912] DeviceIoControl IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS failed \\.\G:, error:50
+[2025/09/24 11:08:10.915] TryId=2 EFI GPT partition type is 0x8000000000000000
+[2025/09/24 11:08:10.917] Try2 Change GPT partition attribute to 0x8000000000000000
+[2025/09/24 11:08:10.965] VDS init OK, service 015AB324
+[2025/09/24 11:08:10.981] Callback 1 process for disk <\\?\PhysicalDrive1>
+[2025/09/24 11:08:10.981] ** Partition 2 (offset: 250290876416, size: 33554432, Attr:0x8000000000000000)
+[2025/09/24 11:08:10.992] Attribute match, No need to change.
+[2025/09/24 11:08:10.992] VDS_ChangeVtoyEFIAttr 1 (offset:250290876416) ret:1 (SUCCESS)
+[2025/09/24 11:08:13.005] Lock disk for update ............................ 
+[2025/09/24 11:08:13.005] QueryDosDeviceA failed error:2
+[2025/09/24 11:08:13.007] [0] CreateFileA \\.\PhysicalDrive1 code:2 FFFFFFFF
+[2025/09/24 11:08:13.007] Could not open \\.\PhysicalDrive1 183
+[2025/09/24 11:08:13.007] Can get handle of ???, maybe some process control it.
+[2025/09/24 11:08:13.008] Failed to GetPhysicalHandle for write.
+[2025/09/24 11:08:13.008] FSCTL_UNLOCK_VOLUME bRet:0 code:6
+[2025/09/24 11:08:13.010] FindProcessOccupyDisk for PhyDrive 1
+[2025/09/24 11:08:13.010] QueryDosDeviceA failed error:2
+[2025/09/24 11:08:13.092] handles->NumberOfHandles = 161708
+[2025/09/24 11:08:13.092] NOTE: Could not identify the process(es) or service(s) accessing ???
+[2025/09/24 11:08:13.093] Change EFI partition attr 1 <0x8000000000000000> to <0x8000000000000000>
+[2025/09/24 11:08:13.098] VDS init OK, service 015ABC24
+[2025/09/24 11:08:13.112] VDS_ChangeVtoyEFIAttr 1 (offset:250290876416) ret:0 (FAIL)
+[2025/09/24 11:08:13.113] Change EFI partition attr failed
+[2025/09/24 11:08:14.115] Now retry to update...
+[2025/09/24 11:08:14.116] #####################################################
+[2025/09/24 11:08:14.117] UpdateVentoy2PhyDrive try3 GPT PhyDrive1 <<SanDisk SanDisk 3.2 Gen1 256GB>>
+[2025/09/24 11:08:14.117] #####################################################
+[2025/09/24 11:08:14.118] Lock disk for umount ............................ 
+[2025/09/24 11:08:14.118] QueryDosDeviceA failed error:2
+[2025/09/24 11:08:14.119] [0] CreateFileA \\.\PhysicalDrive1 code:2 FFFFFFFF
+[2025/09/24 11:08:14.119] Could not open \\.\PhysicalDrive1 183
+[2025/09/24 11:08:14.119] Can get handle of ???, maybe some process control it.
+[2025/09/24 11:08:14.121] Failed to open physical disk
+[2025/09/24 11:08:17.131] Now retry to update...
+[2025/09/24 11:08:17.132] #####################################################
+[2025/09/24 11:08:17.133] UpdateVentoy2PhyDrive try4 GPT PhyDrive1 <<SanDisk SanDisk 3.2 Gen1 256GB>>
+[2025/09/24 11:08:17.133] #####################################################
+[2025/09/24 11:08:17.134] Lock disk for umount ............................ 
+[2025/09/24 11:08:17.135] QueryDosDeviceA failed error:2
+[2025/09/24 11:08:17.136] [0] CreateFileA \\.\PhysicalDrive1 code:2 FFFFFFFF
+[2025/09/24 11:08:17.136] Could not open \\.\PhysicalDrive1 183
+[2025/09/24 11:08:17.136] Can get handle of ???, maybe some process control it.
+[2025/09/24 11:08:17.137] Failed to open physical disk
+[2025/09/24 11:08:17.137] Ventoy_CLI_Update [FAILED]
+[2025/09/24 11:08:17.139] [ERROR] ######### Ventoy CLI FAILED #########

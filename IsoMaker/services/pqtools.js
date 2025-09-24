@@ -16,46 +16,44 @@ async function copyRecursive(src, dst) {
   }
 }
 
+// Busca recursivamente un archivo por nombre (case-insensitive). Retorna la ruta completa o null
+async function findFile(root, name) {
+  try {
+    for (const it of await fsp.readdir(root)) {
+      const p = path.join(root, it);
+      let st;
+      try { st = await fsp.stat(p); } catch { continue }
+      if (st.isDirectory()) {
+        const r = await findFile(p, name);
+        if (r) return r;
+      } else if (it.toLowerCase() === name.toLowerCase()) {
+        return p;
+      }
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}
+
 // Lanzador robusto
 function pqCaptureCmd(defaultLabel) {
   const DEF = (defaultLabel||'').replace(/"/g, '');
-  return `@echo off
-setlocal EnableExtensions EnableDelayedExpansion
+  // simpler wrapper: avoids delayed expansion and complex parsing issues across Windows versions
+  return String.raw`@echo off
+setlocal
 set "SCRIPT=%~dp0pq-capture.ps1"
 set "PS=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
 
 rem Optional first argument is a friendly label for the image
 set "LABEL=%~1"
-if "!LABEL!"=="" (
-  set /p LABEL=Ingrese nombre para la imagen (enter para usar timestamp): 
+
+if "%LABEL%"=="" (
+  "%PS%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%"
+) else (
+  "%PS%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" -Label "%LABEL%"
 )
 
-rem sanitize LABEL to remove dangerous chars that break batch parsing
-set "LABEL=!LABEL:"=!"
-set "LABEL=!LABEL::=-!"
-set "LABEL=!LABEL:/=-!"
-set "LABEL=!LABEL:\=-!"
-set "LABEL=!LABEL:*=-!"
-set "LABEL=!LABEL:?=-!"
-set "LABEL=!LABEL:|=-!"
-set "LABEL=!LABEL:(=-!"
-set "LABEL=!LABEL:)=-!"
-
-if "!LABEL!"=="" set "LABEL=${DEF}"
-
-echo [*] Script: "%SCRIPT%"
-  whoami /groups | find "S-1-5-32-544" >nul 2>&1
-  if not errorlevel 1 (
-    rem already admin — just run the script
-    echo [DEBUG] LABEL=!LABEL!
-    echo [DEBUG] Running PowerShell: "%PS%" -NoProfile -ExecutionPolicy Bypass -NoLogo -File "%SCRIPT%" -Label "!LABEL!"
-    "%PS%" -NoProfile -ExecutionPolicy Bypass -NoLogo -File "%SCRIPT%" -Label "!LABEL!"
-  ) else (
-    rem not admin — invoke PowerShell which will self-elevate
-    echo [DEBUG] LABEL=!LABEL!
-    echo [DEBUG] Running PowerShell (will attempt elevation): "%PS%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" -Label "!LABEL!"
-    "%PS%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT%" -Label "!LABEL!"
-  )
 set EC=%ERRORLEVEL%
 echo.
 echo [*] Salida con código %EC%
@@ -66,7 +64,7 @@ exit /b %EC%
 
 // Capturador con estimación de espacio (60% del usado en C:)
 function pqCapturePs1() {
-  return `# PowerShell capture script (compatible with older PS versions)
+  return String.raw`# PowerShell capture script (compatible with older PS versions)
 $ErrorActionPreference='Stop'
 # label may be passed as first argument ($args[0])
 function W($c,$m){ Write-Host $m -ForegroundColor $c }
@@ -191,7 +189,51 @@ $psi.RedirectStandardOutput = $true
 $psi.RedirectStandardError  = $true
 $proc = New-Object System.Diagnostics.Process
 $proc.StartInfo = $psi
-$null = $proc.Start()
+Write-Host "[DEBUG] wimlib path: $wimlib"
+if (Test-Path $wimlib) {
+  Write-Host "[DEBUG] wimlib exists. File info:"
+  Get-Item $wimlib | Format-List Name,FullName,Length,Mode,LastWriteTime
+  try {
+    Write-Host "[DEBUG] attempting direct invoke: $wimlib --version"
+    & $wimlib --version 2>&1 | Write-Host
+  } catch {
+    Write-Host "[DEBUG] direct invoke failed: $_"
+  }
+} else {
+  Write-Host "[DEBUG] wimlib NOT found at $wimlib"
+}
+
+try {
+  $null = $proc.Start()
+} catch {
+  Write-Host ""
+  Err ("Error al iniciar wimlib: $($_.Exception.Message)")
+  if ($_.Exception.InnerException) { Write-Host $_.Exception.InnerException.Message }
+  try { $win32 = New-Object System.ComponentModel.Win32Exception($_.Exception.HResult); Write-Host ("Win32Exception: {0}" -f $win32.Message) } catch {}
+
+  # Fallback: if imagex.exe exists on the USB, try using it (compatible with older Windows/AIK)
+  $imagex = Join-Path $scriptRoot 'imagex.exe'
+  if (Test-Path $imagex) {
+    Warn "wimlib failed to start. Intentando fallback con imagex.exe"
+    try {
+      $imgArgs = @('/capture', "$srcDrive\\", "$destWim", "Snapshot-$comp", '/compress:fast')
+      Write-Host "[DEBUG] imagex command: $imagex $($imgArgs -join ' ')"
+      $proc2 = Start-Process -FilePath $imagex -ArgumentList $imgArgs -NoNewWindow -PassThru -Wait -ErrorAction Stop
+      if ($proc2.ExitCode -ne 0) { Err ("imagex terminó con código $($proc2.ExitCode)"); Read-Host "Enter para salir"; exit $proc2.ExitCode }
+      Ok "Captura completada con imagex." 
+    } catch {
+      Err "Fallback con imagex falló: $($_.Exception.Message)"; Read-Host "Enter para salir"; exit 110
+    }
+  }
+
+  Err "El ejecutable 'wimlib-imagex.exe' no es ejecutable en este sistema (posible incompatibilidad con Windows 7)."
+  Write-Host "Opciones:"
+  Write-Host "  - Copiar una versión de 'wimlib-imagex.exe' compilada para Windows 7 (x86/x64 según el OS) en la carpeta PQTools y volver a ejecutar 'Instalar PQTools' desde la app o copiar manualmente al USB." -ForegroundColor Yellow
+  Write-Host "  - Copiar 'imagex.exe' (Windows AIK) en la carpeta PQTools; el script intentará usarlo como fallback." -ForegroundColor Yellow
+  Write-Host "  - Ejecutar la captura desde un equipo con soporte para la versión actual de wimlib." -ForegroundColor Yellow
+  Read-Host "Enter para salir"
+  exit 101
+}
 
 while (-not $proc.HasExited) {
   $line = $proc.StandardOutput.ReadLine()
@@ -259,8 +301,27 @@ export async function installPQTools({ driveLetter, srcDir, defaultLabel } = {})
     }
   }
 
-  if (!hasWimlib) {
-    const help = `Falta wimlib-imagex.exe
+  // Try to find and copy imagex.exe from srcDir (mounted ISO) or vendor locations
+  let hasImagex = false;
+  const imagexCandidates = [];
+  if (srcDir) imagexCandidates.push(srcDir);
+  imagexCandidates.push(path.resolve(process.cwd(), 'vendor', 'pqtools', 'win'));
+  imagexCandidates.push(path.resolve(process.cwd(), 'vendor', 'winpe'));
+  for (const root of imagexCandidates) {
+    try {
+      const found = await findFile(root, 'imagex.exe');
+      if (found) {
+        await copyRecursive(found, path.win32.join(target, 'imagex.exe'));
+        hasImagex = true;
+        break;
+      }
+    } catch (err) {
+      // continue
+    }
+  }
+
+  if (!hasWimlib && !hasImagex) {
+    const help = `Falta wimlib-imagex.exe (y tampoco se encontró imagex.exe)
 
 El script de captura requiere el ejecutable 'wimlib-imagex.exe'. Opciones para solucionarlo:
 
@@ -272,7 +333,7 @@ Mientras no exista 'wimlib-imagex.exe', el capturador no puede crear WIMs y most
     try { await fsp.writeFile(path.win32.join(target, 'README-MISSING-WIMLIB.txt'), help, 'utf8'); } catch {}
   }
 
-  return { targetDir: target, hasWimlib };
+  return { targetDir: target, hasWimlib, hasImagex };
 }
 
 export default { installPQTools };
