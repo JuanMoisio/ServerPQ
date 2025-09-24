@@ -47,7 +47,6 @@ vendor/ventoy/**         # no versionar binarios de Ventoy
 !vendor/ventoy/.keep     # dejá un marcador vacío si querés mantener la carpeta
 *.iso                    # nunca subas ISOs al repo
 *.dmg
-*.exe
 *.msi
 *.pkg
 *.AppImage

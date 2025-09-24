@@ -8,6 +8,7 @@ export function App() {
   const [selected, setSelected] = useState<string>('');
   const [log, setLog]         = useState<string>('');
   const [exePath, setExePath] = useState<string>('');
+  const [captureLabel, setCaptureLabel] = useState<string>('');
 
   useEffect(() => {
     refresh();
@@ -45,7 +46,7 @@ export function App() {
     // 3) PQTools
     try {
       const src = await window.api.pqtoolsDefaultSrc();
-      const r = await window.api.pqtoolsInstall({ driveLetter: selected, srcDir: src || undefined });
+      const r = await window.api.pqtoolsInstall({ driveLetter: selected, srcDir: src || undefined, defaultLabel: captureLabel || undefined });
       setLog(l => (l?l+'\n':'') + `PQTools OK → ${r.targetDir} (wimlib=${r.hasWimlib ? 'OK':'faltante'})`);
     } catch (e:any) {
       setLog(l => (l?l+'\n':'') + `PQTools ERROR: ${e?.message || e}`);
@@ -86,6 +87,10 @@ export function App() {
         <div style={{ display:'flex', gap:8 }}>
           <input style={{ flex:1 }} value={exePath} onChange={e=>setExePath(e.target.value)} placeholder="Ruta a Ventoy2Disk.exe" />
           <button onClick={async ()=>{ const p = await window.api.ventoyPickExe(); if (p) setExePath(p); }}>Buscar EXE</button>
+        </div>
+        <div style={{ display:'flex', gap:8, marginTop:8 }}>
+          <input style={{ flex:1 }} value={captureLabel} onChange={e=>setCaptureLabel(e.target.value)} placeholder="Nombre para la imagen (opcional)" />
+          <div style={{ width:120, display:'flex', alignItems:'center', justifyContent:'center', fontSize:12, opacity:.8 }}>[label opcional]</div>
         </div>
         <button onClick={fullInstall} disabled={!selected} style={{ marginTop:8 }}>
           🚀 Instalar TODO en {selected || 'USB'}

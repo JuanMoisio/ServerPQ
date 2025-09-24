@@ -46,8 +46,8 @@ contextBridge.exposeInMainWorld('api', {
 
   // PQTOOLS
   async pqtoolsDefaultSrc() { return await invoke('pqtools:defaultSrc'); },
-  async pqtoolsInstall({ driveLetter, srcDir }) {
-    return await invoke('pqtools:install', { driveLetter: driveLetter, srcDir });
+  async pqtoolsInstall({ driveLetter, srcDir, defaultLabel } = {}) {
+    return await invoke('pqtools:install', { driveLetter: driveLetter, srcDir, defaultLabel });
   },
 
   // WINPE
