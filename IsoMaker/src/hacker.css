@@ -1,0 +1,326 @@
+:root{
+  --bg:#0b0f0c;--text:#00ff88;--text-dim:#6cffc2;--accent:#18ffa6;--grid:rgba(0,255,136,.06)
+}
+*{box-sizing:border-box}
+html,body,#root{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  text-shadow:0 0 2px rgba(0,255,136,.35)
+}
+/* calaveras + grilla */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.25;
+  background-image:
+    radial-gradient(var(--grid) 1px,transparent 1px),
+    url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'>\
+<g fill='none' stroke='%2300ff88' stroke-width='1.75' opacity='0.25'>\
+<circle cx='32' cy='24' r='10'/>\
+<rect x='24' y='33' width='16' height='10' rx='3'/>\
+<circle cx='28' cy='22' r='2.5'/><circle cx='36' cy='22' r='2.5'/>\
+<path d='M24 44 h16 M28 46 v6 M32 46 v6 M36 46 v6'/>\
+</g></svg>");
+  background-size:20px 20px,128px 128px; background-position:center,center; mix-blend-mode:screen
+}
+/* scanlines */
+body::after{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.35;
+  background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0px,rgba(0,0,0,0) 2px,rgba(0,0,0,.15) 3px)
+}
+/* contenedor */
+.hacker-shell{min-height:100%;padding:28px;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(0,255,136,.10), transparent 60%),
+    radial-gradient(1000px 500px at 90% 110%, rgba(0,255,136,.08), transparent 60%)
+}
+.panel{border:1px solid rgba(0,255,136,.35);border-radius:10px;padding:18px 20px;background:rgba(0,20,12,.55);
+  box-shadow:0 0 12px rgba(0,255,136,.08), inset 0 0 18px rgba(0,255,136,.05)
+}
+.title{font-weight:700;letter-spacing:.5px;display:inline-block;filter:drop-shadow(0 0 6px rgba(0,255,136,.4));
+  animation:glow 2.6s ease-in-out infinite
+}
+@keyframes glow{
+  0%,100%{text-shadow:0 0 2px rgba(24,255,166,.35),0 0 14px rgba(24,255,166,.18)}
+  50%{text-shadow:0 0 6px rgba(24,255,166,.55),0 0 22px rgba(24,255,166,.28)}
+}
+.prompt{color:var(--accent)}
+.cursor{display:inline-block;width:10px;height:1.2em;vertical-align:-3px;margin-left:5px;background:var(--accent);
+  box-shadow:0 0 6px rgba(24,255,166,.8);animation:blink 1s steps(1) infinite
+}
+@keyframes blink{50%{opacity:0}}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid rgba(0,255,136,.35);
+  color:var(--text);background:rgba(0,20,12,.4);border-radius:8px;text-decoration:none;cursor:pointer;
+  transition:transform .08s, box-shadow .12s, border-color .12s
+}
+.btn:hover{transform:translateY(-1px);border-color:var(--accent);box-shadow:0 0 10px rgba(0,255,136,.22)}
+.input{width:100%;padding:10px 12px;color:var(--text);background:rgba(0,20,12,.5);
+  border:1px solid rgba(0,255,136,.35);border-radius:8px;outline:none
+}
+.input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,255,136,.12)}
+.list{list-style:none;padding-left:0;margin:12px 0 0}
+.list li::before{content:"> ";color:var(--accent)}
+.log{font-size:.95rem;line-height:1.5;max-height:40vh;overflow:auto;padding:12px;border-radius:8px;
+  background:rgba(0,12,8,.6);border:1px dashed rgba(0,255,136,.35)
+}
+.log::-webkit-scrollbar{width:8px}
+.log::-webkit-scrollbar-thumb{background:rgba(0,255,136,.35);border-radius:10px}
+
+/* --- Sello miosio (XL) --- */
+.stamp {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  padding: 8px 18px;
+  border: 2px solid rgba(0,255,136,0.5);
+  border-radius: 999px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1;
+  backdrop-filter: blur(1px);
+  transform: rotate(-3deg) scale(1.05);
+  box-shadow:
+    0 0 18px rgba(0,255,136,0.18),
+    inset 0 0 18px rgba(0,255,136,0.10);
+  opacity: 0;
+  animation: stamp-in 1.2s ease-out forwards, stamp-flicker 2.2s ease-in-out 1.2s 2;
+}
+
+.stamp::before,
+.stamp::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 2px dashed rgba(0,255,136,0.28);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .stamp {
+    font-size: 14px;
+    padding: 6px 14px;
+    right: 12px;
+    top: 10px;
+  }
+}
+
+@keyframes stamp-in {
+  0%   { transform: rotate(-15deg) scale(0.9);  opacity: 0 }
+  60%  { transform: rotate(3deg)   scale(1.1);  opacity: 1 }
+  100% { transform: rotate(-3deg)  scale(1.05); opacity: 1 }
+}
+
+@keyframes stamp-flicker {
+  0%, 19%, 21%, 23%, 100% { filter: drop-shadow(0 0 10px rgba(24,255,166,.35)); opacity: 1 }
+  20%, 22%                 { filter: drop-shadow(0 0 0 rgba(24,255,166,0));      opacity: .7 }
+}
+
+/* — Tagline neón callejón, versión "asusta un poco" — */
+.tagline {
+  position: relative;
+  display: block;
+  text-align: center;
+  margin: 8px 0 16px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text);
+
+  /* MÁS CHICO */
+  font-size: clamp(20px, 3.8vw, 42px);
+  line-height: 1.05;
+
+  /* glow base mínimo (cuando “no falla”) */
+  text-shadow:
+    0 0 2px rgba(24,255,166,.30),
+    0 0 8px rgba(24,255,166,.18),
+    0 0 14px rgba(24,255,166,.10);
+
+  opacity: .92;
+  animation:
+    tagline-in .4s ease-out .1s forwards,
+    neon-flicker-intense 3.6s linear infinite,
+    glitch-jitter 2.8s steps(24) infinite;
+}
+
+/* Doble imagen fantasma para glitch cromático */
+.tagline::before,
+.tagline::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: .25;
+  filter: blur(0.6px);
+}
+
+.tagline::before {
+  transform: translate(0,0);
+  color: #8aff00; /* verde amarillento */
+  animation: ghost-shift 1.9s steps(12) infinite;
+}
+.tagline::after {
+  transform: translate(0,0);
+  color: #00ffd0; /* cian verdoso */
+  animation: ghost-shift 2.3s steps(16) reverse infinite;
+}
+
+/* entrada suave */
+@keyframes tagline-in {
+  from { opacity: 0; transform: translateY(-4px) }
+  to   { opacity: .92; transform: translateY(0) }
+}
+
+/* Flicker más agresivo: cortes, picos, pérdida de glow */
+@keyframes neon-flicker-intense {
+  0%   { opacity:.92; text-shadow:0 0 2px rgba(24,255,166,.30),0 0 8px rgba(24,255,166,.18),0 0 14px rgba(24,255,166,.10) }
+  6%   { opacity:.70 }
+  7%   { opacity:.35; text-shadow:none }           /* corte fuerte */
+  9%   { opacity:.95 }
+  13%  { opacity:.60 }
+  14%  { opacity:.30; text-shadow:none }           /* otro chispazo */
+  16%  { opacity:.92 }
+  41%  { opacity:.85 }
+  42%  { opacity:.45; text-shadow:none }
+  43%  { opacity:.96 }
+  67%  { opacity:.78 }
+  68%  { opacity:.40; text-shadow:none }
+  70%  { opacity:.94 }
+  88%  { opacity:.72 }
+  89%  { opacity:.32; text-shadow:none }
+  91%  { opacity:.93 }
+  100% { opacity:.92 }
+}
+
+/* Pequeños saltos laterales tipo vibración de cartel flojo */
+@keyframes glitch-jitter {
+  0%   { transform: translateX(0) }
+  8%   { transform: translateX(-0.6px) }
+  9%   { transform: translateX(0.8px) }
+  22%  { transform: translateX(-0.4px) }
+  23%  { transform: translateX(0.5px) }
+  37%  { transform: translateX(-0.8px) }
+  38%  { transform: translateX(0.6px) }
+  59%  { transform: translateX(-0.5px) }
+  60%  { transform: translateX(0.7px) }
+  81%  { transform: translateX(-0.6px) }
+  82%  { transform: translateX(0.5px) }
+  100% { transform: translateX(0) }
+}
+
+/* Desfasaje cromático en los fantasmas */
+@keyframes ghost-shift {
+  0%   { transform: translate(0,0) }
+  20%  { transform: translate(-1px, -0.5px) }
+  21%  { transform: translate(1px, 0.5px) }
+  50%  { transform: translate(0.6px, -0.4px) }
+  70%  { transform: translate(-0.8px, 0.4px) }
+  100% { transform: translate(0,0) }
+}
+
+/* Respeto accesibilidad: sin titileo si se pide menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .tagline {
+    animation: tagline-in .4s ease-out .1s forwards;
+  }
+  .tagline::before,
+  .tagline::after { display:none }
+}
+
+/* — Omen: blackout + calavera gigante — */
+.omen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;         /* por encima del panel */
+  pointer-events: none;  /* no bloquea la UI */
+  opacity: 0;
+  animation: omen-cycle 26s linear infinite;
+}
+
+/* Fondo negro durante la aparición */
+.omen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  animation: omen-bg 26s linear infinite;
+}
+
+/* Calavera gigante centrada */
+.omen::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: min(62vmin, 720px);
+  height: min(62vmin, 720px);
+  transform: translate(-50%, -50%) scale(0.9);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,.35))
+          drop-shadow(0 0 40px rgba(255,255,255,.15));
+  animation:
+    omen-skull 26s linear infinite,
+    omen-flicker 26s linear infinite;
+  /* SVG calavera blanca (simple, sin dependencias) */
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'>\
+  <g fill='none' stroke='%23ffffff' stroke-width='4'>\
+    <circle cx='64' cy='50' r='36' fill='%23ffffff'/>\
+    <circle cx='50' cy='46' r='8' fill='%23000000'/>\
+    <circle cx='78' cy='46' r='8' fill='%23000000'/>\
+    <path d='M40 72h48v18a6 6 0 0 1-6 6h-8v14M54 96v14M74 96v14' stroke-linecap='round'/>\
+  </g>\
+</svg>");
+}
+
+/* Timeline general: ventana de aparición entre ~85% y ~95% del ciclo */
+@keyframes omen-cycle {
+  0%, 84%   { opacity: 0 }
+  85%, 95%  { opacity: 1 }
+  96%, 100% { opacity: 0 }
+}
+
+/* Fondo negro entra/sale */
+@keyframes omen-bg {
+  0%, 84%   { opacity: 0 }
+  85%       { opacity: .95 }
+  90%       { opacity: 1 }
+  95%       { opacity: .9 }
+  96%, 100% { opacity: 0 }
+}
+
+/* Calavera aparece con pop y se va */
+@keyframes omen-skull {
+  0%, 84%   { opacity: 0; transform: translate(-50%, -50%) scale(0.9) }
+  85%       { opacity: .0; transform: translate(-50%, -50%) scale(0.9) }
+  86%       { opacity: 1;  transform: translate(-50%, -50%) scale(1.04) }
+  88%       { opacity: .92;transform: translate(-50%, -50%) scale(1.00) }
+  93%       { opacity: .96;transform: translate(-50%, -50%) scale(1.02) }
+  95%       { opacity: .0; transform: translate(-50%, -50%) scale(0.98) }
+  96%,100%  { opacity: 0;  transform: translate(-50%, -50%) scale(0.96) }
+}
+
+/* Flicker sucio tipo “venta de datos al diablo” */
+@keyframes omen-flicker {
+  0%,84% { filter: drop-shadow(0 0 10px rgba(255,255,255,.0)) drop-shadow(0 0 40px rgba(255,255,255,.0)) }
+  86%    { filter: drop-shadow(0 0 10px rgba(255,255,255,.45)) drop-shadow(0 0 42px rgba(255,255,255,.25)) }
+  87%    { filter: none }
+  88%    { filter: drop-shadow(0 0 14px rgba(255,255,255,.35)) drop-shadow(0 0 50px rgba(255,255,255,.18)) }
+  90%    { filter: drop-shadow(0 0 6px rgba(255,255,255,.25)) }
+  92%    { filter: drop-shadow(0 0 18px rgba(255,255,255,.45)) drop-shadow(0 0 60px rgba(255,255,255,.22)) }
+  95%    { filter: none }
+  96%,100% { filter: none }
+}
+
+/* Accesibilidad: sin jumps si piden menos movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .omen, .omen::before, .omen::after { animation: none; opacity: 0 }
+}

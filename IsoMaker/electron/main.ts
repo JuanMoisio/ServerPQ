@@ -50,10 +50,13 @@ async function createWindow() {
     ? path.resolve(process.cwd(), 'electron', 'preload.js')
     : path.resolve(__dirname2, 'preload.js');
 
-  win = new BrowserWindow({
-    width: 1120, height: 820,
-    webPreferences: { contextIsolation: true, nodeIntegration: false, preload: preloadPath }
-  });
+win = new BrowserWindow({
+  width: 1200,
+  height: 800,
+  backgroundColor: "#0b0f0c", // ⬅️ mismo que --bg
+  show: false,                // opcional: mostrar cuando esté listo
+});
+win.once("ready-to-show", () => win.show());
 
   win.on('unresponsive', () => err('BrowserWindow unresponsive'));
   win.webContents.on('did-fail-load', (_e, ec, desc) => err('did-fail-load', { ec, desc }));

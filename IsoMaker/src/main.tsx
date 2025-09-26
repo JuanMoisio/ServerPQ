@@ -1,6 +1,7 @@
 ﻿import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./app.tsx";
+import App from "./App";
+import "./hacker.css"; // ⬅️ nuevo
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
