@@ -4956,3 +4956,333 @@
 [2025/09/24 11:08:17.137] Failed to open physical disk
 [2025/09/24 11:08:17.137] Ventoy_CLI_Update [FAILED]
 [2025/09/24 11:08:17.139] [ERROR] ######### Ventoy CLI FAILED #########
+[2025/09/29 12:11:15.073] 
+##################################################################################
+############################## Ventoy2DiskX86 CLI MODE #############################
+##################################################################################
+[2025/09/29 12:11:15.073] Current Directory <C:\Users\jmoisio\AppData\Local\Temp\ventoy-cli-3y70mH>
+[2025/09/29 12:11:15.073] Exe file path <C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win\Ventoy2Disk.exe>
+[2025/09/29 12:11:15.073] Change current dir to exe <C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win>
+[2025/09/29 12:11:15.073] Current directory:<C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win>
+[2025/09/29 12:11:15.073] ######### Current Ventoy Version: Ventoy2DiskX86 1.0.99 ########
+[2025/09/29 12:11:15.077] Windows Version: <<Windows 11 Pro, 64-bit (Build 26100.6584)>>
+[2025/09/29 12:11:15.078] Get PhyDrive by logical drive E:
+[2025/09/29 12:11:15.078] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:15366860800
+[2025/09/29 12:11:15.079] Ventoy CLI update PhyDrive:1 GPT SecureBoot:0 ReserveSpace:0MB USBCheck:1 FS:EXFAT NonDest:0
+[2025/09/29 12:11:15.081] Create file Handle:0000015C \\.\PhysicalDrive1 status:0
+[2025/09/29 12:11:15.081] PHYSICALDRIVE1 size 15401484288 bytes
+[2025/09/29 12:11:15.082] PhyDrive:1 BusType:USB  Removable:1 Size:16GB(15401484288) Name:SanDisk Cruzer Blade
+[2025/09/29 12:11:15.084] Create file Handle:00000158 \\.\PhysicalDrive1 status:0
+[2025/09/29 12:11:15.090] Read MBR Ret:1 Size:512 code:183
+[2025/09/29 12:11:15.096] =========== Disk1 GPT Partition 1 ============
+[2025/09/29 12:11:15.097] PartTbl.PartType = {ebd0a0a2-b9e5-4433-87c0-68b6b72699c7}
+[2025/09/29 12:11:15.097] PartTbl.PartGuid = {f453acb3-9f7a-40df-bddc-b6100857d3cc}
+[2025/09/29 12:11:15.097] PartTbl.StartLBA = 2048
+[2025/09/29 12:11:15.097] PartTbl.LastLBA = 30015447
+[2025/09/29 12:11:15.098] PartTbl.Attribute = 0x0
+[2025/09/29 12:11:15.098] PartTbl.Name = Ventoy
+[2025/09/29 12:11:15.098] =========== Disk1 GPT Partition 2 ============
+[2025/09/29 12:11:15.098] PartTbl.PartType = {ebd0a0a2-b9e5-4433-87c0-68b6b72699c7}
+[2025/09/29 12:11:15.099] PartTbl.PartGuid = {54433ba8-a9d4-4115-ba3c-03a6e051a982}
+[2025/09/29 12:11:15.099] PartTbl.StartLBA = 30015448
+[2025/09/29 12:11:15.100] PartTbl.LastLBA = 30080983
+[2025/09/29 12:11:15.100] PartTbl.Attribute = 0xc000000000000001
+[2025/09/29 12:11:15.100] PartTbl.Name = VTOYEFI
+[2025/09/29 12:11:15.101] PhysicalDrive1 is ventoy disk
+[2025/09/29 12:11:15.101] QueryDosDeviceA success \Device\Harddisk1\DR1
+[2025/09/29 12:11:15.213] [0] CreateFileA \\.\PhysicalDrive1 code:0 00000168
+[2025/09/29 12:11:15.213] Parse FAT fs...
+[2025/09/29 12:11:15.216] attach media success...
+[2025/09/29 12:11:19.260] GetVentoyVerInPhyDrive rc=0...
+[2025/09/29 12:11:19.261] VentoyVerInPhyDrive 1 is <1.0.99>...
+[2025/09/29 12:11:19.264] PhyDrive 1 is Ventoy Disk ver:1.0.99 SecureBoot:1
+[2025/09/29 12:11:19.265] GetVentoyFsNameInPhyDrive  not found
+[2025/09/29 12:11:19.265] Ventoy_CLI_Update start ...
+[2025/09/29 12:11:19.265] #####################################################
+[2025/09/29 12:11:19.265] UpdateVentoy2PhyDrive try1 GPT PhyDrive1 <<SanDisk Cruzer Blade 16GB>>
+[2025/09/29 12:11:19.265] #####################################################
+[2025/09/29 12:11:19.265] Lock disk for umount ............................ 
+[2025/09/29 12:11:19.265] QueryDosDeviceA success \Device\Harddisk1\DR1
+[2025/09/29 12:11:19.268] [0] CreateFileA \\.\PhysicalDrive1 code:0 00000170
+[2025/09/29 12:11:19.268] FSCTL_LOCK_VOLUME success
+[2025/09/29 12:11:19.280] GPT StartSector in PartTbl:30015448
+[2025/09/29 12:11:19.280] GPT Reserved Disk Space:0 MB
+[2025/09/29 12:11:19.280] Try to delete VtoyEFI mount point for PhyDrive 1
+
+[2025/09/29 12:11:19.280] LogicalDrive:\\.\C: PhyDrive:0 Num:1 Offset:240123904 ExtentLength:569646252032
+[2025/09/29 12:11:19.280] LogicalDrive:\\.\D: PhyDrive:0 Num:1 Offset:570750402560 ExtentLength:429453737984
+[2025/09/29 12:11:19.294] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:15366860800
+[2025/09/29 12:11:19.294] E: is belong to phydrive1
+[2025/09/29 12:11:19.295] TryId=1 EFI GPT partition type is 0xc000000000000001
+[2025/09/29 12:11:19.295] Change GPT partition type to ESP
+[2025/09/29 12:11:21.104] VDS init OK, service 0081BF14
+[2025/09/29 12:11:21.120] Callback 2 process for disk2 <\\?\PhysicalDrive1>
+[2025/09/29 12:11:21.164] VDS_ChangeVtoyEFI2ESP 1 ret:1 (SUCCESS)
+[2025/09/29 12:11:24.171] Lock disk for update ............................ 
+[2025/09/29 12:11:24.171] QueryDosDeviceA success \Device\Harddisk1\DR1
+[2025/09/29 12:11:24.176] [0] CreateFileA \\.\PhysicalDrive1 code:0 00000274
+[2025/09/29 12:11:24.176] Opened \\.\PhysicalDrive1 for exclusive write access
+[2025/09/29 12:11:24.178] FSCTL_LOCK_VOLUME success
+[2025/09/29 12:11:24.180] Lock volume for update .......................... 
+[2025/09/29 12:11:24.180] Volume not found, maybe not supported
+[2025/09/29 12:11:24.181] Try write part2 bRet:0 dwSize:0 code:5
+[2025/09/29 12:11:24.181] TryWritePart2 agagin ...
+[2025/09/29 12:11:27.196] Try write part2 bRet:0 dwSize:0 code:5
+[2025/09/29 12:11:27.196] TryWritePart2 failed ....
+[2025/09/29 12:11:27.197] FindProcessOccupyDisk for PhyDrive 1
+[2025/09/29 12:11:27.197] QueryDosDeviceA success \Device\Harddisk1\DR1
+[2025/09/29 12:11:27.249] handles->NumberOfHandles = 154824
+[2025/09/29 12:11:27.249] NOTE: Could not identify the process(es) or service(s) accessing \Device\Harddisk1\DR1
+[2025/09/29 12:11:27.250] Recover GPT partition type to basic
+[2025/09/29 12:11:27.292] VDS init OK, service 0081C814
+[2025/09/29 12:11:27.431] Callback 2 process for disk2 <\\?\PhysicalDrive1>
+[2025/09/29 12:11:28.019] VDS_ChangeVtoyEFI2Basic 1 ret:1 (SUCCESS)
+[2025/09/29 12:11:28.019] Change EFI partition attr 0 <0xc000000000000001> to <0x8000000000000000>
+[2025/09/29 12:11:28.024] VDS init OK, service 008282F4
+[2025/09/29 12:11:30.535] Callback 1 process for disk <\\?\PhysicalDrive1>
+[2025/09/29 12:11:30.537] ** Partition 2 (offset: 15367909376, size: 33554432, Attr:0xc000000000000001)
+[2025/09/29 12:11:31.380] Change this partitions attribute success
+[2025/09/29 12:11:31.380] VDS_ChangeVtoyEFIAttr 1 (offset:15367909376) ret:1 (SUCCESS)
+[2025/09/29 12:11:31.380] Change EFI partition attr success
+[2025/09/29 12:11:32.393] Try to delete VtoyEFI mount point for PhyDrive 1
+
+[2025/09/29 12:11:32.394] LogicalDrive:\\.\C: PhyDrive:0 Num:1 Offset:240123904 ExtentLength:569646252032
+[2025/09/29 12:11:32.394] LogicalDrive:\\.\D: PhyDrive:0 Num:1 Offset:570750402560 ExtentLength:429453737984
+[2025/09/29 12:11:32.395] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:15366860800
+[2025/09/29 12:11:32.395] E: is belong to phydrive1
+[2025/09/29 12:11:32.395] LogicalDrive:\\.\F: PhyDrive:1 Num:1 Offset:15367909376 ExtentLength:33554432
+[2025/09/29 12:11:32.395] F: is belong to phydrive1
+[2025/09/29 12:11:32.395] F:\ is ventoy logical drive
+[2025/09/29 12:11:32.399] Delete mountpoint F:\ ret:1 code:0
+[2025/09/29 12:11:32.400] This time update failed, now wait and retry...
+[2025/09/29 12:11:36.410] Now retry to update...
+[2025/09/29 12:11:36.410] #####################################################
+[2025/09/29 12:11:36.411] UpdateVentoy2PhyDrive try2 GPT PhyDrive1 <<SanDisk Cruzer Blade 16GB>>
+[2025/09/29 12:11:36.411] #####################################################
+[2025/09/29 12:11:36.411] Lock disk for umount ............................ 
+[2025/09/29 12:11:36.411] QueryDosDeviceA success \Device\Harddisk1\DR1
+[2025/09/29 12:11:36.411] [0] CreateFileA \\.\PhysicalDrive1 code:0 00000290
+[2025/09/29 12:11:36.411] FSCTL_LOCK_VOLUME success
+[2025/09/29 12:11:36.419] GPT StartSector in PartTbl:30015448
+[2025/09/29 12:11:36.419] GPT Reserved Disk Space:0 MB
+[2025/09/29 12:11:36.419] Try to delete VtoyEFI mount point for PhyDrive 1
+
+[2025/09/29 12:11:36.422] LogicalDrive:\\.\C: PhyDrive:0 Num:1 Offset:240123904 ExtentLength:569646252032
+[2025/09/29 12:11:36.422] LogicalDrive:\\.\D: PhyDrive:0 Num:1 Offset:570750402560 ExtentLength:429453737984
+[2025/09/29 12:11:36.422] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:15366860800
+[2025/09/29 12:11:36.422] E: is belong to phydrive1
+[2025/09/29 12:11:36.422] TryId=2 EFI GPT partition type is 0x8000000000000000
+[2025/09/29 12:11:36.422] Try2 Change GPT partition attribute to 0x8000000000000000
+[2025/09/29 12:11:36.460] VDS init OK, service 008288DC
+[2025/09/29 12:11:36.471] Callback 1 process for disk <\\?\PhysicalDrive1>
+[2025/09/29 12:11:36.471] ** Partition 2 (offset: 15367909376, size: 33554432, Attr:0x8000000000000000)
+[2025/09/29 12:11:36.471] Attribute match, No need to change.
+[2025/09/29 12:11:36.471] VDS_ChangeVtoyEFIAttr 1 (offset:15367909376) ret:1 (SUCCESS)
+[2025/09/29 12:11:38.478] Lock disk for update ............................ 
+[2025/09/29 12:11:38.478] QueryDosDeviceA success \Device\Harddisk1\DR1
+[2025/09/29 12:11:38.481] [0] CreateFileA \\.\PhysicalDrive1 code:0 00000288
+[2025/09/29 12:11:38.481] Opened \\.\PhysicalDrive1 for exclusive write access
+[2025/09/29 12:11:38.481] FSCTL_LOCK_VOLUME success
+[2025/09/29 12:11:38.481] Lock volume for update .......................... 
+[2025/09/29 12:11:38.481] GetVentoyVolumeName PhyDrive 1 SectorStart:30015448 PartOffset:15367909376
+[2025/09/29 12:11:38.481] Find volume:\\?\Volume{0406d0aa-4595-48b8-bed3-fa06ed48dd40}\
+[2025/09/29 12:11:38.481] IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS bRet:1 code:0
+[2025/09/29 12:11:38.481] NumberOfDiskExtents:1 DiskNumber:0
+[2025/09/29 12:11:38.481] This volume DiskNumber:0 offset:240123904
+[2025/09/29 12:11:38.481] Find volume:\\?\Volume{77e8e6c3-306b-4c2e-ad3f-ae8885120da3}\
+[2025/09/29 12:11:38.481] IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS bRet:1 code:0
+[2025/09/29 12:11:38.481] NumberOfDiskExtents:1 DiskNumber:0
+[2025/09/29 12:11:38.481] This volume DiskNumber:0 offset:569886375936
+[2025/09/29 12:11:38.481] Find volume:\\?\Volume{48ee9489-663c-4e94-b386-27de1e9a92a1}\
+[2025/09/29 12:11:38.487] IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS bRet:1 code:0
+[2025/09/29 12:11:38.487] NumberOfDiskExtents:1 DiskNumber:0
+[2025/09/29 12:11:38.487] This volume DiskNumber:0 offset:570750402560
+[2025/09/29 12:11:38.487] Find volume:\\?\Volume{f453acb3-9f7a-40df-bddc-b6100857d3cc}\
+[2025/09/29 12:11:38.487] IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS bRet:1 code:0
+[2025/09/29 12:11:38.487] NumberOfDiskExtents:1 DiskNumber:1
+[2025/09/29 12:11:38.487] This volume DiskNumber:1 offset:1048576
+[2025/09/29 12:11:38.487] Find volume:\\?\Volume{54433ba8-a9d4-4115-ba3c-03a6e051a982}\
+[2025/09/29 12:11:38.487] IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS bRet:1 code:0
+[2025/09/29 12:11:38.487] NumberOfDiskExtents:1 DiskNumber:1
+[2025/09/29 12:11:38.487] This volume DiskNumber:1 offset:15367909376
+[2025/09/29 12:11:38.487] This volume match
+[2025/09/29 12:11:38.487] GetVentoyVolumeName return 0
+[2025/09/29 12:11:38.487] Now lock and dismount volume <\\?\Volume{54433ba8-a9d4-4115-ba3c-03a6e051a982}>
+[2025/09/29 12:11:38.497] Failed to create file volume, errcode:32, wait and retry ...
+[2025/09/29 12:11:40.513] Failed to create file volume, errcode:32, wait and retry ...
+[2025/09/29 12:11:42.527] Failed to create file volume, errcode:32, wait and retry ...
+[2025/09/29 12:11:44.544] Failed to create file volume, errcode:32, wait and retry ...
+[2025/09/29 12:11:46.545] Failed to create file volume, errcode:183
+[2025/09/29 12:11:46.545] Try write part2 bRet:0 dwSize:0 code:5
+[2025/09/29 12:11:46.545] TryWritePart2 failed ....
+[2025/09/29 12:11:46.545] FindProcessOccupyDisk for PhyDrive 1
+[2025/09/29 12:11:46.545] QueryDosDeviceA success \Device\Harddisk1\DR1
+[2025/09/29 12:11:46.595] handles->NumberOfHandles = 155452
+[2025/09/29 12:11:46.597] NOTE: Could not identify the process(es) or service(s) accessing \Device\Harddisk1\DR1
+[2025/09/29 12:11:46.597] Change EFI partition attr 1 <0x8000000000000000> to <0x8000000000000000>
+[2025/09/29 12:11:46.637] VDS init OK, service 00828D5C
+[2025/09/29 12:11:46.648] Callback 1 process for disk <\\?\PhysicalDrive1>
+[2025/09/29 12:11:46.649] ** Partition 2 (offset: 15367909376, size: 33554432, Attr:0x8000000000000000)
+[2025/09/29 12:11:46.649] Attribute match, No need to change.
+[2025/09/29 12:11:46.649] VDS_ChangeVtoyEFIAttr 1 (offset:15367909376) ret:1 (SUCCESS)
+[2025/09/29 12:11:46.649] Change EFI partition attr success
+[2025/09/29 12:11:47.659] Try to delete VtoyEFI mount point for PhyDrive 1
+
+[2025/09/29 12:11:47.660] LogicalDrive:\\.\C: PhyDrive:0 Num:1 Offset:240123904 ExtentLength:569646252032
+[2025/09/29 12:11:47.660] LogicalDrive:\\.\D: PhyDrive:0 Num:1 Offset:570750402560 ExtentLength:429453737984
+[2025/09/29 12:11:47.661] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:15366860800
+[2025/09/29 12:11:47.661] E: is belong to phydrive1
+[2025/09/29 12:11:48.677] Now retry to update...
+[2025/09/29 12:11:48.677] #####################################################
+[2025/09/29 12:11:48.678] UpdateVentoy2PhyDrive try3 GPT PhyDrive1 <<SanDisk Cruzer Blade 16GB>>
+[2025/09/29 12:11:48.678] #####################################################
+[2025/09/29 12:11:48.678] Lock disk for umount ............................ 
+[2025/09/29 12:11:48.678] QueryDosDeviceA success \Device\Harddisk1\DR1
+[2025/09/29 12:11:48.678] [0] CreateFileA \\.\PhysicalDrive1 code:0 000002A8
+[2025/09/29 12:11:48.678] FSCTL_LOCK_VOLUME success
+[2025/09/29 12:11:48.683] GPT StartSector in PartTbl:30015448
+[2025/09/29 12:11:48.683] GPT Reserved Disk Space:0 MB
+[2025/09/29 12:11:48.683] Try to delete VtoyEFI mount point for PhyDrive 1
+
+[2025/09/29 12:11:48.687] LogicalDrive:\\.\C: PhyDrive:0 Num:1 Offset:240123904 ExtentLength:569646252032
+[2025/09/29 12:11:48.687] LogicalDrive:\\.\D: PhyDrive:0 Num:1 Offset:570750402560 ExtentLength:429453737984
+[2025/09/29 12:11:48.687] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:15366860800
+[2025/09/29 12:11:48.687] E: is belong to phydrive1
+[2025/09/29 12:11:48.687] TryId=3 EFI GPT partition type is 0x8000000000000000
+[2025/09/29 12:11:48.690] VDS init OK, service 0082228C
+[2025/09/29 12:11:48.703] Callback 1 process for disk <\\?\PhysicalDrive1>
+[2025/09/29 12:11:48.703] Deleting partition(offset=15367909376) from disk '\\?\PhysicalDrive1':
+[2025/09/29 12:11:48.703]   Partition 1 (offset: 1048576, size: 15366860800) skip it.
+[2025/09/29 12:11:48.704] * Partition 2 (offset: 15367909376, size: 33554432) delete it.
+[2025/09/29 12:11:48.778] Delete this partitions success
+[2025/09/29 12:11:48.778] VDS_DeleteVtoyEFIPartition 1 ret:1 (SUCCESS)
+[2025/09/29 12:11:48.779] Lock disk for update ............................ 
+[2025/09/29 12:11:48.779] QueryDosDeviceA success \Device\Harddisk1\DR1
+[2025/09/29 12:11:48.782] [0] CreateFileA \\.\PhysicalDrive1 code:0 0000028C
+[2025/09/29 12:11:48.782] Opened \\.\PhysicalDrive1 for exclusive write access
+[2025/09/29 12:11:48.828] FSCTL_LOCK_VOLUME success
+[2025/09/29 12:11:48.828] Lock volume for update .......................... 
+[2025/09/29 12:11:48.828] Volume not found, maybe not supported
+[2025/09/29 12:11:48.828] Try write part2 bRet:1 dwSize:16384 code:183
+[2025/09/29 12:11:48.831] Write Ventoy to disk ............................ 
+[2025/09/29 12:11:48.831] FormatPart2Fat 30015448...
+[2025/09/29 12:11:48.837] Malloc whole img buffer success, now decompress ...
+[2025/09/29 12:11:49.439] decompress finished success
+[2025/09/29 12:11:49.439] VentoyProcSecureBoot 0 ...
+[2025/09/29 12:11:49.439] Open ventoy efi file 00B0A140 
+[2025/09/29 12:11:49.439] ventoy efi file size 1916928 ...
+[2025/09/29 12:11:49.439] Now delete all efi files ...
+[2025/09/29 12:11:49.439] Open bootx64 efi file 00B0A140 
+[2025/09/29 12:11:49.960] Open ventoy efi file 00B0A584 
+[2025/09/29 12:11:49.960] ventoy efi file size 1286144 ...
+[2025/09/29 12:11:49.960] Now delete all efi files ...
+[2025/09/29 12:11:49.960] Open bootia32 efi file 00B0A140 
+[2025/09/29 12:11:50.587] Write part data bRet:1 dwSize:1048576 code:183
+[2025/09/29 12:11:50.665] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:50.742] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:50.820] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:50.901] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:50.979] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:51.057] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:52.617] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:53.297] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:53.374] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:53.451] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:53.529] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:53.605] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:53.682] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:53.838] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:53.919] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:53.997] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:54.076] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:54.152] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:54.229] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:54.382] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:54.460] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:54.533] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:54.612] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:54.692] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:54.764] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:54.844] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.000] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.078] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.161] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.243] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.313] Write part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.359] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.394] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.431] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.462] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.510] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.547] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.579] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.612] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.644] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.693] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.727] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.760] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.795] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.829] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.861] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.898] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.929] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.961] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:55.997] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.028] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.063] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.098] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.127] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.162] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.194] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.229] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.271] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.296] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.329] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.371] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.394] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.429] Read part data bRet:1 dwSize:1048576 code:131
+[2025/09/29 12:11:56.443] Updating Boot Image ............................. 
+[2025/09/29 12:11:56.443] WriteGrubStage1ToPhyDrive ...
+[2025/09/29 12:11:56.448] Write GPT stage1 ...
+[2025/09/29 12:11:56.615] WriteFile Ret:1 dwSize:1031168 ErrCode:183
+[2025/09/29 12:11:56.625] Write resv data ret:1 dwSize:4096 Error:183
+[2025/09/29 12:11:56.625] Copy boot img success
+[2025/09/29 12:11:56.626] Boot image has no difference, no need to write.
+[2025/09/29 12:11:56.626] WriteBackupDataToDisk 15401483776 004FF0B0 512
+[2025/09/29 12:11:56.632] WriteBackupDataToDisk 15401483776 004FF0B0 512 success
+[2025/09/29 12:11:56.632] WriteBackupDataToDisk 15401467392 0080A320 16384
+[2025/09/29 12:11:56.638] WriteBackupDataToDisk 15401467392 0080A320 16384 success
+[2025/09/29 12:11:56.638] WriteBackupDataToDisk 512 0080A120 16896
+[2025/09/29 12:11:56.644] WriteBackupDataToDisk 512 0080A120 16896 success
+[2025/09/29 12:11:56.644] Write backup partition table success
+[2025/09/29 12:11:57.651] OK
+[2025/09/29 12:11:57.651] Ventoy_CLI_Update [SUCCESS]
+[2025/09/29 12:11:57.651] ######### Ventoy CLI SUCCESS #########
+[2025/09/29 12:21:01.448] 
+##################################################################################
+############################## Ventoy2DiskX86 CLI MODE #############################
+##################################################################################
+[2025/09/29 12:21:01.448] Current Directory <C:\Users\jmoisio\AppData\Local\Temp\ventoy-cli-kR9KaI>
+[2025/09/29 12:21:01.448] Exe file path <C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win\Ventoy2Disk.exe>
+[2025/09/29 12:21:01.448] Change current dir to exe <C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win>
+[2025/09/29 12:21:01.449] Current directory:<C:\Users\jmoisio\Desktop\Proyectos Juan\ServerPQ\IsoMaker\vendor\ventoy\win>
+[2025/09/29 12:21:01.449] ######### Current Ventoy Version: Ventoy2DiskX86 1.0.99 ########
+[2025/09/29 12:21:01.452] Windows Version: <<Windows 11 Pro, 64-bit (Build 26100.6584)>>
+[2025/09/29 12:21:01.452] Get PhyDrive by logical drive E:
+[2025/09/29 12:21:01.453] LogicalDrive:\\.\E: PhyDrive:1 Num:1 Offset:1048576 ExtentLength:15399387136
+[2025/09/29 12:21:01.453] Ventoy CLI update PhyDrive:1 GPT SecureBoot:0 ReserveSpace:0MB USBCheck:1 FS:EXFAT NonDest:0
+[2025/09/29 12:21:01.455] Create file Handle:0000015C \\.\PhysicalDrive1 status:0
+[2025/09/29 12:21:01.456] PHYSICALDRIVE1 size 15401484288 bytes
+[2025/09/29 12:21:01.456] PhyDrive:1 BusType:USB  Removable:1 Size:16GB(15401484288) Name:SanDisk Cruzer Blade
+[2025/09/29 12:21:01.458] Create file Handle:00000164 \\.\PhysicalDrive1 status:0
+[2025/09/29 12:21:01.463] Read MBR Ret:1 Size:512 code:183
+[2025/09/29 12:21:01.464] =========== Disk1 GPT Partition 1 ============
+[2025/09/29 12:21:01.464] PartTbl.PartType = {ebd0a0a2-b9e5-4433-87c0-68b6b72699c7}
+[2025/09/29 12:21:01.464] PartTbl.PartGuid = {370da5de-c91d-412c-8c0d-36113c044a72}
+[2025/09/29 12:21:01.464] PartTbl.StartLBA = 2048
+[2025/09/29 12:21:01.464] PartTbl.LastLBA = 30078975
+[2025/09/29 12:21:01.464] PartTbl.Attribute = 0x0
+[2025/09/29 12:21:01.466] PartTbl.Name = Basic data partition
+[2025/09/29 12:21:01.466] Invalid ventoy efi part name <null>
+[2025/09/29 12:21:01.466] [ERROR] No Ventoy information detected in PhyDrive 1, so can not do update
+[2025/09/29 12:21:01.467] [ERROR] ######### Ventoy CLI FAILED #########

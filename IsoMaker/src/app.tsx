@@ -44,79 +44,80 @@ async function refresh() {
 }
 
 
-  async function fullInstall() {
-    if (!selected) return alert("Elegí un USB");
-    setLog(`→ Preparando ${selected}: Ventoy (GPT) + WinPE + PQTools`);
-     if (!hasAPI) { setLog("window.api no disponible (preload)"); return; }
+async function fullInstall() {
+  const hasAPI = typeof window !== "undefined" && (window as any).api;
+  if (!hasAPI) { setLog("window.api no disponible (preload)"); return; }
+  if (!selected) return alert("Elegí un USB");
+  if (!exePath)  setLog(l => (l?l+"\n":"") + "⚠️ Ruta de Ventoy2Disk.exe vacía (voy a intentar detectar por defecto)");
 
-    // 1) Ventoy
-    try {
+  // 0) normalizo letra (E: -> E)
+  const driveLetter = selected.replace(/:\\?$/i, "");
+
+  setLog(`→ Preparando ${selected}: Ventoy (GPT) + WinPE + PQTools`);
+  setLog(l => (l?l+"\n":"") + `• Objetivo: ${selected}  |  Ventoy: ${exePath || "(auto)"}`);
+
+  // 1) Ventoy (intento automático, si no hay, abro GUI)
+  try {
+    // Si existe "ventoy:run" en tu main, el preload podría exponerlo como window.api.ventoyRun
+    const canRun = !!window.api.ventoyRun;
+    if (canRun) {
+      setLog(l => (l?l+"\n":"") + "▶ Ventoy en modo automático (sin GUI)...");
+      const r = await window.api.ventoyRun({
+        exePath,             // puede ir vacío y que el main resuelva default
+        drive: driveLetter,  // tu servicio entiende "E" o "E:"
+        gpt: true, nosb: true, nousbcheck: false,
+        mode: "install"
+      });
+      setLog(l => (l?l+"\n":"") + `✔ Ventoy auto: ${JSON.stringify(r)}`);
+    } else {
+      setLog(l => (l?l+"\n":"") + "▶ Abriendo Ventoy GUI elevado (aceptá UAC y apretá Start)...");
       const r = await window.api.ventoyStart({
-        exePath,
-        mode: "install",
-        target: selected,
-        flags: { gpt: true },
+        exePath, mode: "install", target: selected, flags: { gpt: true, nosb: true, nousbcheck: false }
       });
-      setLog(
-        (l) =>
-          (l ? l + "\n" : "") +
-          `Ventoy lanzado (launcher PID ${r?.launcherPid ?? "n/a"}). Confirmá el UAC y Start en la GUI.`
-      );
-    } catch (e: any) {
-      setLog((l) => (l ? l + "\n" : "") + `Ventoy ERROR: ${e?.message || e}`);
-      return;
+      setLog(l => (l?l+"\n":"") + `Ventoy lanzado (launcher PID ${r?.launcherPid ?? "n/a"}). Confirmá UAC y Start en la GUI.`);
     }
-
-    // 2) WinPE pack
-    try {
-      const r = await window.api.winpeInstallPack({ driveLetter: selected });
-      setLog(
-        (l) =>
-          (l ? l + "\n" : "") +
-          `WinPE OK → ISO: ${r.isoDst} | Scripts: ${r.scriptsDir}${
-            r.copied?.wimlib ? " | wimlib OK" : ""
-          }`
-      );
-    } catch (e: any) {
-      setLog((l) => (l ? l + "\n" : "") + `WinPE ERROR: ${e?.message || e}`);
-    }
-
-    // 3) PQTools
-    try {
-      const src = await window.api.pqtoolsDefaultSrc();
-      const r = await window.api.pqtoolsInstall({
-        driveLetter: selected,
-        srcDir: src || undefined,
-        defaultLabel: captureLabel || undefined,
-      });
-      setLog(
-        (l) =>
-          (l ? l + "\n" : "") +
-          `PQTools OK → ${r.targetDir} (wimlib=${r.hasWimlib ? "OK" : "faltante"})`
-      );
-    } catch (e: any) {
-      setLog((l) => (l ? l + "\n" : "") + `PQTools ERROR: ${e?.message || e}`);
-    }
-
-    // 4) Probe rápido Ventoy
-    try {
-      const pr = await window.api.ventoyProbe(selected, "VENTOY");
-      setLog(
-        (l) =>
-          (l ? l + "\n" : "") +
-          `Verificación Ventoy:\n  - \\ventoy\\: ${pr.hasVdir ? "sí" : "no"}\n  - \\ventoy\\ventoy.json: ${
-            pr.hasVjson ? "sí" : "no"
-          }`
-      );
-    } catch {}
-
-    setLog(
-      (l) =>
-        (l ? l + "\n" : "") +
-        `✅ USB ${selected} listo: Ventoy + WinPE + PQTools.`
-    );
-    refresh();
+  } catch (e:any) {
+    setLog(l => (l?l+"\n":"") + `❌ Ventoy ERROR: ${e?.message || e}`);
+    return; // sin Ventoy, no seguimos
   }
+
+  // 2) WinPE pack
+  try {
+    setLog(l => (l?l+"\n":"") + "▶ Instalando WinPE pack...");
+    const r = await window.api.winpeInstallPack({ driveLetter: selected });
+    setLog(l => (l?l+"\n":"") + `✔ WinPE → ISO: ${r.isoDst} | Scripts: ${r.scriptsDir}` + (r.copied?.wimlib ? " | wimlib OK" : " | wimlib faltante"));
+  } catch (e:any) {
+    setLog(l => (l?l+"\n":"") + `❌ WinPE ERROR: ${e?.message || e}`);
+    // seguimos igual; WinPE opcional según tu flujo
+  }
+
+  // 3) PQTools
+  try {
+    setLog(l => (l?l+"\n":"") + "▶ Instalando PQTools...");
+    const src = await window.api.pqtoolsDefaultSrc();
+    if (!src) setLog(l => (l?l+"\n":"") + "⚠️ PQTools source no encontrado (vendor/pqtools/win).");
+    const r = await window.api.pqtoolsInstall({
+      driveLetter: selected,
+      srcDir: src || undefined,
+      defaultLabel: captureLabel || undefined
+    });
+    setLog(l => (l?l+"\n":"") + `✔ PQTools → ${r.targetDir} (wimlib=${r.hasWimlib ? "OK" : "faltante"})`);
+  } catch (e:any) {
+    setLog(l => (l?l+"\n":"") + `❌ PQTools ERROR: ${e?.message || e}`);
+  }
+
+  // 4) Verificación rápida Ventoy
+  try {
+    setLog(l => (l?l+"\n":"") + "▶ Verificando Ventoy en el USB...");
+    const pr = await window.api.ventoyProbe(selected, "VENTOY");
+    setLog(l => (l?l+"\n":"") + `• \\ventoy\\: ${pr.hasVdir ? "sí" : "no"} | \\ventoy\\ventoy.json: ${pr.hasVjson ? "sí" : "no"}`);
+  } catch (e:any) {
+    setLog(l => (l?l+"\n":"") + `⚠️ Verificación Ventoy falló: ${e?.message || e}`);
+  }
+
+  setLog(l => (l?l+"\n":"") + `✅ USB ${selected} listo (o casi). Si Ventoy fue por GUI, asegurate de haber apretado Start.`);
+  refresh();
+}
 
   return (
     <div className="hacker-shell">
