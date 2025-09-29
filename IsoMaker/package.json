@@ -1,1 +1,31 @@
-{"name":"pq-usb-creator","version":"0.1.0","private":true,"type":"module","main":"dist-electron/electron/main.js","author":"PQS Labs","scripts":{"dev":"npm-run-all -p dev:renderer dev:main:compiled","dev:renderer":"vite","dev:main:compiled":"npm-run-all -p watch:main start:electron","watch:main":"tsc -w -p tsconfig.electron.json","start:electron":"wait-on http://localhost:5175 && cross-env ELECTRON_START_URL=http://localhost:5175 electron .","build":"npm-run-all build:renderer build:main","build:renderer":"vite build","build:main":"tsc -p tsconfig.electron.json && node scripts/copy-electron.cjs"},"devDependencies":{"@swc/core":"^1.13.5","@types/node":"^22.5.0","@types/react":"^18.3.3","@types/react-dom":"^18.3.0","@vitejs/plugin-react":"^4.7.0","cross-env":"^10.0.0","electron":"^31.3.0","electron-builder":"^24.13.3","eslint":"^9.9.0","eslint-plugin-react":"^7.35.0","npm-run-all":"^4.1.5","prettier":"^3.3.3","ts-node":"^10.9.2","tsx":"^4.20.5","typescript":"^5.6.2","vite":"^5.4.2","wait-on":"^8.0.5"},"dependencies":{"react":"^18.3.1","react-dom":"^18.3.1"}}
+{
+  "name": "IsoMaker",
+  "private": true,
+  "version": "0.0.0",
+  "main": "electron/main.ts",
+  "scripts": {
+    "dev": "npm-run-all -p dev:renderer dev:main",
+    "dev:renderer": "vite",
+    "dev:main": "cross-env ELECTRON_START_URL=http://localhost:5175 electron -r tsx electron/main.ts",
+    "build:renderer": "vite build",
+    "build": "npm-run-all build:renderer"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.3",
+    "cross-env": "^10.0.0",
+    "electron": "^38.1.2",
+    "esbuild": "^0.23.0",
+    "npm-run-all": "^4.1.5",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.2",
+    "vite": "^5.4.20"
+  }
+}

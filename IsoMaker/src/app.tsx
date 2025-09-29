@@ -31,17 +31,23 @@ export default function App() {
     })();
   }, []);
 
-  async function refresh() {
-    try {
-      setDrives(await window.api.listDrives());
-    } catch (e: any) {
-      setLog(String(e?.message || e));
-    }
-  }
+  const hasAPI = typeof window !== "undefined" && (window as any).api;
+
+useEffect(() => {
+  // Diagnóstico visible en consola del renderer
+  console.log("[renderer] window.api =", hasAPI ? Object.keys((window as any).api) : hasAPI);
+}, []);
+async function refresh() {
+  if (!hasAPI) { setLog("window.api no disponible (preload)"); return; }
+  try { setDrives(await window.api.listDrives()); }
+  catch (e:any) { setLog(String(e?.message || e)); }
+}
+
 
   async function fullInstall() {
     if (!selected) return alert("Elegí un USB");
     setLog(`→ Preparando ${selected}: Ventoy (GPT) + WinPE + PQTools`);
+     if (!hasAPI) { setLog("window.api no disponible (preload)"); return; }
 
     // 1) Ventoy
     try {
